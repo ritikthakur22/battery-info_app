@@ -1,0 +1,1 @@
+A highly visible, minimal, and offline-first battery widget and app.
