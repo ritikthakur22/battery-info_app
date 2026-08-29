@@ -79,6 +79,28 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
                     onCheckedChange = { viewModel.toggleSecondaryInfo(it) }
                 )
             }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Terms and Conditions",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(8.dp)
+                    // TODO: Add actual UriHandler clickable link here when docs are ready
+                )
+                Text(
+                    text = "Privacy Policy",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(8.dp)
+                    // TODO: Add actual UriHandler clickable link here when docs are ready
+                )
+            }
         }
     }
 }
