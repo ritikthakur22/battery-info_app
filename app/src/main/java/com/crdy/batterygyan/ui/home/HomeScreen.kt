@@ -40,20 +40,21 @@ import com.crdy.batterygyan.domain.model.BatteryHealth
 import com.crdy.batterygyan.domain.model.BatterySnapshot
 import com.crdy.batterygyan.domain.model.BatteryStatus
 import com.crdy.batterygyan.domain.model.DisplaySettings
+import com.crdy.batterygyan.monetization.TestAdBanner
 import java.text.DateFormat
 import java.util.Date
 import java.util.Locale
 
 @Composable
-fun HomeScreen(viewModel: HomeViewModel, settings: DisplaySettings = DisplaySettings()) {
+fun HomeScreen(viewModel: HomeViewModel, settings: DisplaySettings = DisplaySettings(), showAds: Boolean = false) {
     val batteryState by viewModel.batteryState.collectAsState()
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-        batteryState?.let { BatteryContent(it, settings) } ?: LoadingContent()
+        batteryState?.let { BatteryContent(it, settings, showAds) } ?: LoadingContent()
     }
 }
 
 @Composable
-fun BatteryContent(snapshot: BatterySnapshot, settings: DisplaySettings) {
+fun BatteryContent(snapshot: BatterySnapshot, settings: DisplaySettings, showAds: Boolean = false) {
     val scale = settings.textScale
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -71,7 +72,7 @@ fun BatteryContent(snapshot: BatterySnapshot, settings: DisplaySettings) {
         }
         item { BatteryHero(snapshot, scale) }
         item { Text("Battery details", style = MaterialTheme.typography.titleLarge.copy(fontSize = 21.sp * scale), fontWeight = FontWeight.Bold) }
-        items(detailRows(snapshot)) { row -> DetailCard(row, scale) }
+        items(detailRows(snapshot)) { row -> DetailCard(row, scale, settings.iconScale) }
         item {
             val message = when (snapshot.status) {
                 BatteryStatus.CHARGING -> "Charging safely • Keep airflow around your device"
@@ -86,6 +87,7 @@ fun BatteryContent(snapshot: BatterySnapshot, settings: DisplaySettings) {
         item {
             Text("Updated ${DateFormat.getTimeInstance(DateFormat.SHORT).format(Date(snapshot.timestamp))}", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onBackground.copy(alpha = .6f), modifier = Modifier.padding(bottom = 8.dp))
         }
+        if (showAds) item { TestAdBanner(Modifier.fillMaxWidth().padding(bottom = 6.dp)) }
     }
 }
 
@@ -154,10 +156,10 @@ private fun BatteryStatus.toLabel() = name.lowercase().replace('_', ' ').replace
 private fun com.crdy.batterygyan.domain.model.PluggedState.toLabel() = name.lowercase().replaceFirstChar { it.uppercase() }
 
 @Composable
-private fun DetailCard(row: DetailRow, scale: Float) {
+private fun DetailCard(row: DetailRow, scale: Float, iconScale: Float) {
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
         Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 15.dp, vertical = 13.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(row.symbol, fontSize = 22.sp, color = MaterialTheme.colorScheme.primary, modifier = Modifier.size(34.dp))
+            Text(row.symbol, fontSize = 22.sp * iconScale, color = MaterialTheme.colorScheme.primary, modifier = Modifier.size(34.dp * iconScale))
             Text(row.label, style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp * scale), modifier = Modifier.weight(1f))
             Text(row.value, style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp * scale), fontWeight = FontWeight.SemiBold)
         }

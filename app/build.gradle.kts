@@ -89,6 +89,13 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
+    // Monetization and optional advanced-access integrations.
+    implementation(libs.play.services.ads)
+    implementation(libs.user.messaging.platform)
+    implementation(libs.play.billing.ktx)
+    implementation(libs.shizuku.api)
+    implementation(libs.shizuku.provider)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

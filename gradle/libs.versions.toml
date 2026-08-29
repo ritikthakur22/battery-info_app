@@ -11,6 +11,10 @@ composeBom = "2024.02.00"
 glance = "1.0.0"
 datastore = "1.0.0"
 coroutines = "1.7.3"
+ads = "23.6.0"
+ump = "3.2.0"
+billing = "7.1.1"
+shizuku = "13.1.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -31,6 +35,11 @@ androidx-glance-appwidget = { group = "androidx.glance", name = "glance-appwidge
 androidx-glance-material3 = { group = "androidx.glance", name = "glance-material3", version.ref = "glance" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+play-services-ads = { group = "com.google.android.gms", name = "play-services-ads", version.ref = "ads" }
+user-messaging-platform = { group = "com.google.android.ump", name = "user-messaging-platform", version.ref = "ump" }
+play-billing-ktx = { group = "com.android.billingclient", name = "billing-ktx", version.ref = "billing" }
+shizuku-api = { group = "dev.rikka.shizuku", name = "api", version.ref = "shizuku" }
+shizuku-provider = { group = "dev.rikka.shizuku", name = "provider", version.ref = "shizuku" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

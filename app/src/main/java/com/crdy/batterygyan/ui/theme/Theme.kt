@@ -16,16 +16,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
+private fun darkScheme(accent: Color) = darkColorScheme(
+    primary = accent,
     secondary = PurpleGrey80,
     tertiary = Pink80,
     surface = Color(0xFF17151F),
     background = Color(0xFF100E16)
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
+private fun lightScheme(accent: Color) = lightColorScheme(
+    primary = accent,
     secondary = PurpleGrey40,
     tertiary = Pink40,
     surface = Color(0xFFF8F6FF),
@@ -36,15 +36,16 @@ private val LightColorScheme = lightColorScheme(
 fun BatteryGyanTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = true,
+    accentColor: Color = Mint,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+        dynamicColor && accentColor == Mint && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        darkTheme -> darkScheme(accentColor)
+        else -> lightScheme(accentColor)
     }
     val view = LocalView.current
     if (!view.isInEditMode) {

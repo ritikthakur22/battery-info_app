@@ -10,12 +10,18 @@ import com.crdy.batterygyan.domain.model.BatteryHealth
 import com.crdy.batterygyan.domain.model.BatterySnapshot
 import com.crdy.batterygyan.domain.model.BatteryStatus
 import com.crdy.batterygyan.domain.model.PluggedState
+import com.crdy.batterygyan.platform.alerts.BatteryAlertController
+import com.crdy.batterygyan.domain.model.AlertPolicy
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.onStart
 
-class AndroidBatteryDataSource(private val context: Context) : BatteryRepository {
+class AndroidBatteryDataSource(
+    private val context: Context,
+    private val alertController: BatteryAlertController? = null,
+    private val alertPolicy: () -> AlertPolicy = { AlertPolicy() }
+) : BatteryRepository {
 
     override suspend fun getBatterySnapshot(): BatterySnapshot {
         val filter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
@@ -27,7 +33,10 @@ class AndroidBatteryDataSource(private val context: Context) : BatteryRepository
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 if (intent.action == Intent.ACTION_BATTERY_CHANGED) {
-                    trySend(parseBatteryIntent(intent))
+                    parseBatteryIntent(intent).also { snapshot ->
+                        alertController?.onSnapshot(snapshot, alertPolicy())
+                        trySend(snapshot)
+                    }
                 }
             }
         }
