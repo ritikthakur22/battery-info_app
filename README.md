@@ -23,46 +23,7 @@ Android’s default battery indicator is tiny and shallow. Battery Gyan turns it
 <tr><td>♿ <b>Accessibility first</b><br/>Adjustable 0.8×–2× type scale, clear labels, strong hierarchy and TalkBack-friendly content.</td><td>🛡️ <b>Private by default</b><br/>No account, ads, analytics, network access or background polling. Ever.</td></tr>
 </table>
 
-## 🧭 How it works
 
-```mermaid
-flowchart LR
-    A[Android battery broadcast] --> B[AndroidBatteryDataSource]
-    B --> C[BatteryRepository]
-    C --> D[HomeViewModel]
-    D --> E[Animated Compose dashboard]
-    B --> F[Battery widget]
-    G[Settings] --> H[(Local DataStore)]
-    H --> E
-    style A fill:#211846,color:#fff,stroke:#00C9A7
-    style E fill:#6355B5,color:#fff,stroke:#FFB52E
-    style H fill:#EDE9FF,color:#211846,stroke:#6355B5
-```
-
-The app is deliberately event-driven: the foreground flow registers only while the screen is observed, and the widget reads the platform battery manager when it renders. That means no service, wake lock, timer, or cloud account is needed.
-
-## 🎬 UI motion, without motion sickness
-
-| Moment | Motion | Meaning |
-|---|---|---|
-| Battery value changes | Ring eases to the new percentage | The reading is fresh |
-| Device is charging | Accent ring breathes gently | Power is flowing |
-| Low battery | Accent shifts to warm amber | A clear, non-verbal cue |
-| Screen opens | Progress indicator resolves | Data is being read |
-
-## 🧱 Architecture
-
-```mermaid
-sequenceDiagram
-    participant OS as Android OS
-    participant Data as Battery data source
-    participant VM as HomeViewModel
-    participant UI as Compose UI
-    OS->>Data: ACTION_BATTERY_CHANGED
-    Data->>VM: BatterySnapshot
-    VM->>UI: StateFlow update
-    UI->>UI: Animate ring + redraw cards
-```
 
 ## 🛠️ Build it
 
@@ -77,15 +38,40 @@ cd battery-info_app
 
 Release signing is intentionally local/secret-only. Put values in an ignored `keystore.properties` file when you need a signed build; the repository contains no signing credentials.
 
-## 📦 Project map
+## 📦 Project File Tree
 
 ```text
-app/src/main/java/com/crdy/batterygyan/
-├── data/       repositories + local DataStore
-├── domain/     battery and display models
-├── platform/   Android battery event adapter
-├── ui/         animated Compose home + settings
-└── widget/     responsive Jetpack Glance widget
+app/src/main/java/com/crdy/batterygyan
+├── data
+│   ├── BatteryRepository.kt
+│   ├── local
+│   │   └── SettingsDataStore.kt
+│   └── SettingsRepository.kt
+├── domain
+│   └── model
+│       ├── BatterySnapshot.kt
+│       └── DisplaySettings.kt
+├── MainActivity.kt
+├── platform
+│   ├── battery
+│   │   └── AndroidBatteryDataSource.kt
+│   └── widget
+├── ui
+│   ├── components
+│   ├── home
+│   │   ├── HomeScreen.kt
+│   │   └── HomeViewModel.kt
+│   ├── settings
+│   │   ├── SettingsScreen.kt
+│   │   └── SettingsViewModel.kt
+│   └── theme
+│       ├── Color.kt
+│       ├── Theme.kt
+│       └── Type.kt
+├── util
+└── widget
+    ├── BatteryGlanceWidget.kt
+    └── BatteryWidgetReceiver.kt
 ```
 
 ## 🔐 Privacy & license
