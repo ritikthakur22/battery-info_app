@@ -61,7 +61,7 @@ fun WidgetContent() {
         modifier = GlanceModifier
             .fillMaxSize()
             .background(GlanceTheme.colors.surface)
-            .clickable(actionStartActivity<MainActivity>())
+            .clickable(actionStartActivity(android.content.Intent(context, MainActivity::class.java).apply { flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK }))
             .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalAlignment = Alignment.CenterVertically
