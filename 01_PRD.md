@@ -1,4 +1,4 @@
-# Battery Visibility — Product Requirements Document (PRD)
+# Battery Gyan — Product Requirements Document (PRD)
 
 ## 1. Product Summary
 A lightweight, fully offline Android utility that makes battery level highly readable for users who struggle to see the small system battery percentage. The app provides:

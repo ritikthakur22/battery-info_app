@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Battery Visibility"
+rootProject.name = "Battery Gyan"
 include(":app")

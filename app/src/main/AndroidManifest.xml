@@ -17,13 +17,13 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.BatteryVisibility"
+        android:theme="@style/Theme.BatteryGyan"
         tools:targetApi="31">
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:resizeableActivity="true"
-            android:theme="@style/Theme.BatteryVisibility">
+            android:theme="@style/Theme.BatteryGyan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

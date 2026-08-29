@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.batteryvisibility.app"
+    namespace = "com.crdy.batterygyan"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.batteryvisibility.app"
+        applicationId = "com.crdy.batterygyan"
         minSdk = 29
         targetSdk = 34
         versionCode = 1

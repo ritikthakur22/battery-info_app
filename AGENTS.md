@@ -1,4 +1,4 @@
-# AGENTS.md — Battery Visibility Android App
+# AGENTS.md — Battery Gyan Android App
 
 ## Mission
 Build a very lightweight, offline-first Android battery visibility/accessibility utility.
