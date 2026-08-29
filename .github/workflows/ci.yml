@@ -29,16 +29,32 @@ jobs:
     - name: Run Unit Tests
       run: ./gradlew test
 
-    - name: Build Debug APK
-      run: ./gradlew assembleDebug
+    - name: Build Release APK
+      run: ./gradlew assembleRelease
 
     - name: Build Release App Bundle (AAB)
       run: ./gradlew bundleRelease
-      # Note: For real production releases, you'd configure signing keys via GitHub Secrets
-      # and pass them to Gradle properties here.
 
-    - name: Upload Build Artifacts
+    - name: Upload Build Artifacts (AAB)
       uses: actions/upload-artifact@v4
       with:
         name: app-release-bundle
         path: app/build/outputs/bundle/release/app-release.aab
+
+    - name: Upload Build Artifacts (APK)
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-release-apk
+        path: app/build/outputs/apk/release/app-release.apk
+
+    - name: Create GitHub Release
+      if: github.ref == 'refs/heads/main'
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v1.0.${{ github.run_number }}
+        name: Battery Gyan Release v1.0.${{ github.run_number }}
+        files: |
+          app/build/outputs/bundle/release/app-release.aab
+          app/build/outputs/apk/release/app-release.apk
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

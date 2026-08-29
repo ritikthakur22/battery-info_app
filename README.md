@@ -80,20 +80,44 @@ Requirements:
 - Minimum SDK: 29 (Android 10)
 - Target SDK: 34
 
-To build locally:
+To build locally, clone the repository first:
 ```bash
-# Clone the repository
 git clone https://github.com/ritikthakur22/battery-info_app.git
+cd battery-info_app
+```
 
+### For Windows:
+```cmd
+# Run lint checks
+gradlew.bat lint
+
+# Build debug APK
+gradlew.bat assembleDebug
+
+# Build Release APK and App Bundle (AAB)
+gradlew.bat assembleRelease bundleRelease
+```
+
+### For Linux / Mac:
+```bash
 # Run lint checks
 ./gradlew lint
 
 # Build debug APK
 ./gradlew assembleDebug
+
+# Build Release APK and App Bundle (AAB)
+./gradlew assembleRelease bundleRelease
 ```
 
 ## Privacy
 Battery Gyan requires absolutely **zero dangerous permissions**. It does not have the `INTERNET` permission in its manifest. Your settings stay on your device.
 
-## License
+## License & Open Source Packages
 This project is licensed under the **GNU General Public License v3.0 (GPL-3.0)**. See the [LICENSE](LICENSE) file for details.
+
+**Open Source Libraries Used (Apache License 2.0):**
+*   [Jetpack Compose](https://developer.android.com/jetpack/compose) - Modern native UI toolkit.
+*   [Jetpack Glance](https://developer.android.com/jetpack/compose/glance) - App widget framework.
+*   [Jetpack DataStore](https://developer.android.com/topic/libraries/architecture/datastore) - Offline preference persistence.
+*   [Kotlin Coroutines](https://kotlinlang.org/docs/coroutines-overview.html) - Asynchronous programming.
