@@ -19,13 +19,17 @@ import androidx.core.view.WindowCompat
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
     secondary = PurpleGrey80,
-    tertiary = Pink80
+    tertiary = Pink80,
+    surface = Color(0xFF17151F),
+    background = Color(0xFF100E16)
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = Purple40,
     secondary = PurpleGrey40,
-    tertiary = Pink40
+    tertiary = Pink40,
+    surface = Color(0xFFF8F6FF),
+    background = Color(0xFFF1EFF8)
 )
 
 @Composable

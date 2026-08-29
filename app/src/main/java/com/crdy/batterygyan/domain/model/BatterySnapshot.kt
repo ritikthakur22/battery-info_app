@@ -19,6 +19,9 @@ data class BatterySnapshot(
     val temperatureC: Float?,
     val voltageMv: Int?,
     val currentUa: Int?,
+    val chargeCounterUah: Int?,
+    val energyNwh: Long?,
+    val technology: String?,
     val health: BatteryHealth?,
     val timestamp: Long
 )

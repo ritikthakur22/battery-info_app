@@ -86,9 +86,15 @@ class AndroidBatteryDataSource(private val context: Context) : BatteryRepository
 
         val voltageMv = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1).takeIf { it > 0 }
 
-        // Current usually requires BatteryManager property queries on modern Android,
-        // so we leave it null for the broadcast receiver payload unless available.
-        val currentUa: Int? = null
+        val batteryManager = context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+        val currentUa = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
+            .takeIf { it != Int.MIN_VALUE && it != 0 }
+        val chargeCounterUah = batteryManager
+            .getIntProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER)
+            .takeIf { it > 0 }
+        val energyNwh = batteryManager
+            .getLongProperty(BatteryManager.BATTERY_PROPERTY_ENERGY_COUNTER)
+            .takeIf { it > 0 }
 
         return BatterySnapshot(
             percentage = percentage,
@@ -97,6 +103,9 @@ class AndroidBatteryDataSource(private val context: Context) : BatteryRepository
             temperatureC = temperatureC,
             voltageMv = voltageMv,
             currentUa = currentUa,
+            chargeCounterUah = chargeCounterUah,
+            energyNwh = energyNwh,
+            technology = intent.getStringExtra(BatteryManager.EXTRA_TECHNOLOGY),
             health = health,
             timestamp = System.currentTimeMillis()
         )
@@ -110,6 +119,9 @@ class AndroidBatteryDataSource(private val context: Context) : BatteryRepository
             temperatureC = null,
             voltageMv = null,
             currentUa = null,
+            chargeCounterUah = null,
+            energyNwh = null,
+            technology = null,
             health = BatteryHealth.UNKNOWN,
             timestamp = System.currentTimeMillis()
         )

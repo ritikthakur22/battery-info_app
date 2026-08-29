@@ -25,6 +25,18 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
+    - name: Prepare Keystore
+      env:
+        KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        KEYSTORE_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
+      run: |
+        echo $KEYSTORE_BASE64 | base64 -d > app/release.jks
+        echo "storeFile=app/release.jks" > keystore.properties
+        echo "storePassword=$KEYSTORE_PASSWORD" >> keystore.properties
+        echo "keyAlias=$KEYSTORE_ALIAS" >> keystore.properties
+        echo "keyPassword=$KEYSTORE_PASSWORD" >> keystore.properties
+
     - name: Run Detekt / Lint (if configured)
       run: ./gradlew lint
 

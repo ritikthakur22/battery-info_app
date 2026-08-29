@@ -1,6 +1,13 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+}
+
+val signingPropertiesFile = rootProject.file("keystore.properties")
+val signingProperties = Properties().apply {
+    if (signingPropertiesFile.exists()) signingPropertiesFile.inputStream().use(::load)
 }
 
 android {
@@ -22,17 +29,20 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file("release.jks")
-            storePassword = "password123"
-            keyAlias = "release"
-            keyPassword = "password123"
+            val storePath = signingProperties["storeFile"]?.toString()
+            if (storePath != null) {
+                storeFile = rootProject.file(storePath)
+                storePassword = signingProperties["storePassword"]?.toString()
+                keyAlias = signingProperties["keyAlias"]?.toString()
+                keyPassword = signingProperties["keyPassword"]?.toString()
+            }
         }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = true
-            signingConfig = signingConfigs.getByName("release")
+            if (signingPropertiesFile.exists()) signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

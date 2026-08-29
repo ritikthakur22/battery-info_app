@@ -1,123 +1,98 @@
-# Battery Gyan
+<div align="center">
 
-![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)
-![Kotlin](https://img.shields.io/badge/kotlin-%237F52FF.svg?style=for-the-badge&logo=kotlin&logoColor=white)
-![Jetpack Compose](https://img.shields.io/badge/Jetpack_Compose-4285F4?style=for-the-badge&logo=android&logoColor=white)
-![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-blue.svg?style=for-the-badge)
-![API 29+](https://img.shields.io/badge/API-29%2B-brightgreen.svg?style=for-the-badge)
+<img src="https://capsule-render.vercel.app/api?type=waving&color=6355B5&height=190&section=header&text=Battery%20Gyan&fontSize=54&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=See%20your%20power.%20Understand%20your%20battery.&descAlignY=62&descSize=16" width="100%" alt="Battery Gyan banner" />
 
-*A professional, open-source Android battery visibility and accessibility utility.*
+<p><strong>A beautiful, readable, offline-first battery dashboard for Android.</strong></p>
 
----
+<img src="https://img.shields.io/badge/Android-10%2B-00A889?style=flat-square&logo=android&logoColor=white" alt="Android 10+" />
+<img src="https://img.shields.io/badge/Kotlin-1.9.22-7F52FF?style=flat-square&logo=kotlin&logoColor=white" alt="Kotlin" />
+<img src="https://img.shields.io/badge/Compose-Material%203-6355B5?style=flat-square&logo=jetpackcompose&logoColor=white" alt="Compose" />
+<img src="https://img.shields.io/badge/License-GPL--3.0-E79A17?style=flat-square" alt="GPL-3.0" />
 
-## What is Battery Gyan?
-Battery Gyan is a lightweight, offline-first Android utility that makes battery level highly readable for users who struggle to see the small system battery percentage. Whether you need larger typography, high contrast, or a simple glanceable home-screen widget, Battery Gyan provides maximum readability with minimum battery/resource cost.
+<br /><br />
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=16&duration=2600&pause=700&color=6355B5&center=true&vCenter=true&width=500&lines=Live+battery+telemetry;Readable+by+design;Zero+trackers.+Zero+internet.;A+widget+that+stays+out+of+your+way." alt="Animated feature list" />
 
-## Why Battery Gyan?
-The default Android status bar battery percentage is often too small for comfortable viewing, especially for glasses users, older users, and anyone who prefers highly visible UI. Battery Gyan solves this problem without adding bloated features, ads, or background trackers. It respects your privacy and your device's battery life.
+</div>
 
-## Key Features
+## ✨ The quick story
 
-| Feature | Description |
-|---|---|
-| 🔍 **Large & Clear UI** | Easily read your battery percentage and charging state inside the app with scalable typography. |
-| 🪟 **Responsive Widgets** | Highly configurable home-screen widgets via Jetpack Glance that adapt to small, medium, and large sizes. |
-| 🎨 **Material 3 Theming** | Modern, premium, minimalist UI with Light, Dark, and System theme support. |
-| 📴 **Offline-First Privacy** | No internet permission, no accounts, no analytics, and no ads. Local preferences are stored safely on-device via DataStore. |
-| ⚡ **Battery Efficient** | Event-driven updates using standard Android broadcast intents (`ACTION_POWER_CONNECTED`, etc.). No continuous background polling. |
+Android’s default battery indicator is tiny and shallow. Battery Gyan turns it into a friendly, glanceable dashboard with oversized type, a lively progress ring, charging guidance, and the details power users actually want.
 
-## Accessibility
-Battery Gyan is built accessibility-first:
-* User-adjustable text scaling (0.8x to 2.0x).
-* Clear, non-color-reliant status labels.
-* Strong visual hierarchy and contrast.
-* Supports TalkBack semantics.
+<table>
+<tr><td>⚡ <b>Live telemetry</b><br/>Level, state, plug type, temperature, voltage, current, energy, health and technology.</td><td>🎨 <b>Expressive UI</b><br/>Animated charging pulse, semantic color states, Material 3 surfaces and adaptive iconography.</td></tr>
+<tr><td>♿ <b>Accessibility first</b><br/>Adjustable 0.8×–2× type scale, clear labels, strong hierarchy and TalkBack-friendly content.</td><td>🛡️ <b>Private by default</b><br/>No account, ads, analytics, network access or background polling. Ever.</td></tr>
+</table>
 
-## Performance & Battery Efficiency
-We care about your battery life. Battery Gyan is designed to consume negligible resources:
-* **No continuous polling:** The app and widgets only update when necessary (e.g., when you open the app, tap a widget, or plug in your device).
-* **No unnecessary background services:** We do not run persistent background loops or WorkManager jobs.
-* **Minimal dependencies:** Clean native architecture to keep the APK size incredibly small.
-
-## Tech Stack
-* **Language:** Kotlin
-* **UI Framework:** Jetpack Compose (Material 3)
-* **Widget Framework:** Jetpack Glance
-* **Architecture:** MVVM (Model-View-ViewModel)
-* **Persistence:** Jetpack DataStore (Preferences)
-* **Concurrency:** Kotlin Coroutines & Flows
-* **Build System:** Gradle (Kotlin DSL, Version Catalog)
-
-## Architecture
+## 🧭 How it works
 
 ```mermaid
-graph TD
-    UI[Compose UI / HomeScreen] --> VM[HomeViewModel]
-    Widget[GlanceAppWidget] --> Receiver[BatteryWidgetReceiver]
-    VM --> Repo[BatteryRepository Interface]
-    Repo --> Data[AndroidBatteryDataSource]
-    Data --> Intent[ACTION_BATTERY_CHANGED]
-    SettingsUI[SettingsScreen] --> SettingsVM[SettingsViewModel]
-    SettingsVM --> SettingsRepo[SettingsRepository Interface]
-    SettingsRepo --> DataStore[SettingsDataStore]
+flowchart LR
+    A[Android battery broadcast] --> B[AndroidBatteryDataSource]
+    B --> C[BatteryRepository]
+    C --> D[HomeViewModel]
+    D --> E[Animated Compose dashboard]
+    B --> F[Battery widget]
+    G[Settings] --> H[(Local DataStore)]
+    H --> E
+    style A fill:#211846,color:#fff,stroke:#00C9A7
+    style E fill:#6355B5,color:#fff,stroke:#FFB52E
+    style H fill:#EDE9FF,color:#211846,stroke:#6355B5
 ```
 
-## Project Structure
-```text
-app/src/main/java/com/crdy/batterygyan/
-├── MainActivity.kt            # Entry point and Compose Navigation setup
-├── data/                      # Repositories and DataStore implementation
-├── domain/                    # Enums, Data Classes, and core models
-├── platform/                  # Android-specific battery broadcast receivers
-├── ui/                        # Jetpack Compose UI screens (Home & Settings)
-├── ui/theme/                  # Material 3 typography, colors, and themes
-└── widget/                    # Jetpack Glance widget layout and receivers
+The app is deliberately event-driven: the foreground flow registers only while the screen is observed, and the widget reads the platform battery manager when it renders. That means no service, wake lock, timer, or cloud account is needed.
+
+## 🎬 UI motion, without motion sickness
+
+| Moment | Motion | Meaning |
+|---|---|---|
+| Battery value changes | Ring eases to the new percentage | The reading is fresh |
+| Device is charging | Accent ring breathes gently | Power is flowing |
+| Low battery | Accent shifts to warm amber | A clear, non-verbal cue |
+| Screen opens | Progress indicator resolves | Data is being read |
+
+## 🧱 Architecture
+
+```mermaid
+sequenceDiagram
+    participant OS as Android OS
+    participant Data as Battery data source
+    participant VM as HomeViewModel
+    participant UI as Compose UI
+    OS->>Data: ACTION_BATTERY_CHANGED
+    Data->>VM: BatterySnapshot
+    VM->>UI: StateFlow update
+    UI->>UI: Animate ring + redraw cards
 ```
 
-## Installation & Development
-Requirements:
-- Android Studio / JDK 17
-- Minimum SDK: 29 (Android 10)
-- Target SDK: 34
+## 🛠️ Build it
 
-To build locally, clone the repository first:
+Requires Android Studio with JDK 17 and Android SDK 34.
+
 ```bash
 git clone https://github.com/ritikthakur22/battery-info_app.git
 cd battery-info_app
-```
-
-### For Windows:
-```cmd
-# Run lint checks
-gradlew.bat lint
-
-# Build debug APK
-gradlew.bat assembleDebug
-
-# Build Release APK and App Bundle (AAB)
-gradlew.bat assembleRelease bundleRelease
-```
-
-### For Linux / Mac:
-```bash
-# Run lint checks
-./gradlew lint
-
-# Build debug APK
 ./gradlew assembleDebug
-
-# Build Release APK and App Bundle (AAB)
-./gradlew assembleRelease bundleRelease
+./gradlew lint
 ```
 
-## Privacy
-Battery Gyan requires absolutely **zero dangerous permissions**. It does not have the `INTERNET` permission in its manifest. Your settings stay on your device.
+Release signing is intentionally local/secret-only. Put values in an ignored `keystore.properties` file when you need a signed build; the repository contains no signing credentials.
 
-## License & Open Source Packages
-This project is licensed under the **GNU General Public License v3.0 (GPL-3.0)**. See the [LICENSE](LICENSE) file for details.
+## 📦 Project map
 
-**Open Source Libraries Used (Apache License 2.0):**
-*   [Jetpack Compose](https://developer.android.com/jetpack/compose) - Modern native UI toolkit.
-*   [Jetpack Glance](https://developer.android.com/jetpack/compose/glance) - App widget framework.
-*   [Jetpack DataStore](https://developer.android.com/topic/libraries/architecture/datastore) - Offline preference persistence.
-*   [Kotlin Coroutines](https://kotlinlang.org/docs/coroutines-overview.html) - Asynchronous programming.
+```text
+app/src/main/java/com/crdy/batterygyan/
+├── data/       repositories + local DataStore
+├── domain/     battery and display models
+├── platform/   Android battery event adapter
+├── ui/         animated Compose home + settings
+└── widget/     responsive Jetpack Glance widget
+```
+
+## 🔐 Privacy & license
+
+Battery Gyan requests zero permissions and has no `INTERNET` declaration. Battery readings never leave the device. The project is available under [GPL-3.0](LICENSE).
+
+<div align="center">
+<br />
+<img src="https://capsule-render.vercel.app/api?type=waving&color=211846&height=100&section=footer&animation=twinkling" width="100%" alt="Animated footer" />
+</div>
