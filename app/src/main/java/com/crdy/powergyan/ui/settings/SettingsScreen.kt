@@ -30,6 +30,7 @@ fun SettingsScreen(
     val settings by viewModel.displaySettings.collectAsState()
     val context = LocalContext.current
     var showFaqDialog by remember { mutableStateOf(false) }
+    var showLicenseDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -122,6 +123,10 @@ fun SettingsScreen(
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/ritikthakur22"))
                     context.startActivity(intent)
                 })
+
+                AboutItem("License", "Proprietary software — All rights reserved", onClick = {
+                    showLicenseDialog = true
+                })
                 
                 Spacer(Modifier.height(12.dp))
                 Button(onClick = { 
@@ -162,6 +167,26 @@ fun SettingsScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showFaqDialog = false }) {
+                    Text("Close")
+                }
+            }
+        )
+    }
+
+    if (showLicenseDialog) {
+        AlertDialog(
+            onDismissRequest = { showLicenseDialog = false },
+            title = { Text("License") },
+            text = {
+                Text(
+                    "Copyright (c) 2026. All Rights Reserved.\n\n" +
+                        "PowerGyan and its associated documentation are proprietary and closed-source. " +
+                        "You may not copy, modify, distribute, sell, lease, or reverse engineer any part " +
+                        "of the software without permission."
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { showLicenseDialog = false }) {
                     Text("Close")
                 }
             }
