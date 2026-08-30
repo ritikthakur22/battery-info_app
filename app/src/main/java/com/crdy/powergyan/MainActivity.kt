@@ -1,9 +1,13 @@
 package com.crdy.powergyan
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedContent
@@ -20,6 +24,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -74,6 +79,23 @@ class MainActivity : ComponentActivity() {
             val settings by settingsViewModel.displaySettings.collectAsState()
             currentAlertPolicy = settings.alertPolicy
             val removeAds by billingManager.removeAds.collectAsState()
+            var notificationPermissionRequested by rememberSaveable { mutableStateOf(false) }
+            val notificationPermissionLauncher = rememberLauncherForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { }
+
+            LaunchedEffect(settings.alertPolicy.enabled, settings.smartChargeConfig.enabled) {
+                val monitoringEnabled = settings.alertPolicy.enabled || settings.smartChargeConfig.enabled
+                if (
+                    monitoringEnabled &&
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                    checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED &&
+                    !notificationPermissionRequested
+                ) {
+                    notificationPermissionRequested = true
+                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
             
             LaunchedEffect(settings.alertPolicy.enabled, settings.smartChargeConfig.enabled) {
                 val intent = Intent(this@MainActivity, BatteryMonitorService::class.java)
