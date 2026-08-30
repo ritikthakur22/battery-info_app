@@ -22,6 +22,8 @@ This is the interface included in the `v1.0.0` APK. The generated feature image 
 
 Play Console icon: [powergyan-app-icon.png](docs/images/powergyan-app-icon.png) — 512×512 PNG exported from the active adaptive launcher icon design.
 
+Play Console feature graphic: [powergyan-feature-graphic.png](docs/images/powergyan-feature-graphic.png) — 1024×500 RGB PNG.
+
 <div align="center">
 <img src="docs/images/powergyan-feature-hero.png" alt="PowerGyan battery analytics and charge control feature overview" width="860" />
 </div>
