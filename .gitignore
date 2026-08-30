@@ -20,3 +20,4 @@ local.properties
 *.keystore
 keystore.properties
 play-store-api-key.json
+app/src/

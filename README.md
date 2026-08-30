@@ -7,7 +7,6 @@
 <img src="https://img.shields.io/badge/Android-10%2B-00A889?style=flat-square&logo=android&logoColor=white" alt="Android 10+" />
 <img src="https://img.shields.io/badge/Kotlin-1.9.22-7F52FF?style=flat-square&logo=kotlin&logoColor=white" alt="Kotlin" />
 <img src="https://img.shields.io/badge/Compose-Material%203-6355B5?style=flat-square&logo=jetpackcompose&logoColor=white" alt="Compose" />
-<img src="https://img.shields.io/badge/License-GPL--3.0-E79A17?style=flat-square" alt="GPL-3.0" />
 <img src="https://img.shields.io/badge/API-29%2B-00A889?style=flat-square&logo=android" alt="API 29+" />
 
 <br /><br />
@@ -51,53 +50,11 @@ cd battery-info_app
 
 Release signing is intentionally local/secret-only. Put values in an ignored `keystore.properties` file when you need a signed build; the repository contains no signing credentials. AdMob test IDs must be replaced with production IDs before publishing.
 
-## 📦 Project File Tree
-
-```text
-app/src/main/java/com/crdy/batterygyan
-├── data
-│   ├── BatteryRepository.kt
-│   ├── local
-│   │   └── SettingsDataStore.kt
-│   └── SettingsRepository.kt
-├── domain
-│   └── model
-│       ├── BatterySnapshot.kt
-│       └── DisplaySettings.kt
-├── MainActivity.kt
-├── monetization
-│   ├── AdMobBanner.kt
-│   ├── BillingManager.kt
-│   └── TestNativeAdCard.kt
-├── platform
-│   ├── access
-│   │   ├── CapabilityDetector.kt
-│   │   └── ChargeControlProvider.kt
-│   ├── battery
-│   │   └── AndroidBatteryDataSource.kt
-│   └── alerts
-│       └── BatteryAlertController.kt
-├── ui
-│   ├── components
-│   ├── home
-│   │   ├── HomeScreen.kt
-│   │   └── HomeViewModel.kt
-│   ├── settings
-│   │   ├── SettingsScreen.kt
-│   │   └── SettingsViewModel.kt
-│   └── theme
-│       ├── Color.kt
-│       ├── Theme.kt
-│       └── Type.kt
-├── util
-└── widget
-    ├── BatteryGlanceWidget.kt
-    └── BatteryWidgetReceiver.kt
-```
-
 ## 🔐 Privacy & license
 
-Battery Gyan requests Internet for AdMob and optional GitHub-hosted informational content, plus notification permission only where notification alerts are enabled. Battery readings, settings, Root checks, and charge-control results remain local. The project is available under [GPL-3.0](LICENSE).
+Battery Gyan respects your privacy. It requests Internet access only for optional informational updates and Google services (Ads/Billing). Battery readings, local settings, Root checks, and charge-control data remain strictly on your device. 
+
+**License:** All Rights Reserved. This project is closed-source and proprietary. Unauthorized distribution, modification, or commercial use is strictly prohibited.
 
 <div align="center">
 <br />
