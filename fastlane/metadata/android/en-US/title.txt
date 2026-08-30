@@ -1,1 +1,1 @@
-Battery Gyan - Charge Limiter & Analytics Root & without Root
+PowerGyan - Charge Limiter

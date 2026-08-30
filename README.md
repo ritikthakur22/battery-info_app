@@ -1,62 +1,93 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=6355B5&height=190&section=header&text=Battery%20Gyan&fontSize=54&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=See%20your%20power.%20Understand%20your%20battery.&descAlignY=62&descSize=16" width="100%" alt="Battery Gyan banner" />
+<img src="https://capsule-render.vercel.app/api?type=waving&color=3689E8&height=190&section=header&text=PowerGyan&fontSize=54&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Charge%20Limiter%20%26%20Battery%20Analytics&descAlignY=62&descSize=16" width="100%" alt="PowerGyan banner" />
 
-<p><strong>A beautiful, readable battery dashboard for Android — with standard, Root and Shizuku capability paths.</strong></p>
+<p><strong>PowerGyan - Charge Limiter &amp; Battery Analytics [Root]</strong></p>
 
-<img src="https://img.shields.io/badge/Android-10%2B-00A889?style=flat-square&logo=android&logoColor=white" alt="Android 10+" />
+<img src="https://img.shields.io/badge/Android-10%2B-3689E8?style=flat-square&logo=android&logoColor=white" alt="Android 10+" />
 <img src="https://img.shields.io/badge/Kotlin-1.9.22-7F52FF?style=flat-square&logo=kotlin&logoColor=white" alt="Kotlin" />
-<img src="https://img.shields.io/badge/Compose-Material%203-6355B5?style=flat-square&logo=jetpackcompose&logoColor=white" alt="Compose" />
+<img src="https://img.shields.io/badge/Jetpack%20Compose-Material%203-3689E8?style=flat-square&logo=jetpackcompose&logoColor=white" alt="Jetpack Compose Material 3" />
 <img src="https://img.shields.io/badge/API-29%2B-00A889?style=flat-square&logo=android" alt="API 29+" />
 
 <br /><br />
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=16&duration=2600&pause=700&color=6355B5&center=true&vCenter=true&width=500&lines=Live+battery+telemetry;Readable+by+design;Root+%2B+Shizuku+capabilities;Ads+you+can+remove+forever." alt="Animated feature list" />
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=16&duration=2600&pause=700&color=3689E8&center=true&vCenter=true&width=540&lines=Live+battery+telemetry;Readable+by+design;Root+charge+control+when+verified;Widgets+and+local+alerts." alt="Animated feature list" />
 
 </div>
 
-## ✨ The quick story
+PowerGyan is an Android battery dashboard for users who want clear battery information, local alerts, widgets, and optional capability-based charge control. Standard battery information works without Root, Shizuku, or Internet access.
 
-Android’s default battery indicator is tiny and shallow. Battery Gyan turns it into a friendly, glanceable dashboard with oversized type, a lively progress ring, charging guidance, and the details power users actually want.
+## Features
 
-<table>
-<tr><td>⚡ <b>Live telemetry</b><br/>Level, state, plug type, temperature, voltage, current, energy, health and technology.</td><td>🎨 <b>Expressive UI</b><br/>Animated charging pulse, semantic color states, Material 3 surfaces and adaptive iconography.</td></tr>
-<tr><td>♿ <b>Accessibility first</b><br/>Adjustable type/icon scale, clear labels, strong hierarchy and TalkBack-friendly native controls.</td><td>🛡️ <b>Core stays local</b><br/>Battery data stays on-device; Internet is used only for ads and optional informational JSON.</td></tr>
-</table>
+- Large battery percentage with charging and low-battery states.
+- Voltage, current, charge counter, energy, temperature, health, plug type, technology, and battery history where the device exposes them.
+- Battery details with a visual charge/discharge curve and last-charge information when enough history exists.
+- Configurable battery, plug, and unplug alerts with system sounds or local audio files.
+- Material 3 interface with light/dark/system themes, accent presets, adjustable text and icon scale, and accessible native controls.
+- Jetpack Glance widget with percentage, status, and secondary battery information.
+- Verified Root detection and capability-based Smart Charge Control. Charge limiting is device and kernel dependent; unsupported devices are reported instead of receiving a false success state.
+- Separate Shizuku availability and permission detection. Shizuku is not treated as direct Root for sysfs charge control.
+- Optional temperature-control experiment with bounded settings and safety warnings.
+- Google Mobile Ads and a one-time `remove_ads_lifetime` Play Billing entitlement. Development builds use Google test ad units.
+- Optional HTTPS GitHub-hosted announcements and compatibility information with local caching. No executable code or shell commands are downloaded.
 
+## Charge control safety
 
+Smart Charge Control requires a verified Root capability and a supported charging-control interface. The app validates the requested stop/resume relationship, checks the interface, writes only the configured value, reads it back, and reports failure when it cannot verify the result. Hardware and OEM support is not universal.
 
-## 🧪 Advanced access
+The default stop/resume values are 80% and 75%. Reset and reboot actions are protected by confirmation dialogs. Do not enable charge control unless you understand the device-specific risks and have tested the result on your phone.
 
-Standard battery information works without Root, Shizuku, or Internet. When available, Battery Gyan verifies a real `su -c id` root probe or Shizuku binder/permission state. Charge limiting uses only fixed known sysfs interfaces, validates ranges, writes, reads back, and reports failure when verification is impossible. There is no universal OEM promise.
+## Privacy and permissions
 
-## 💳 Monetization
+Core battery readings, settings, local audio selections, and history remain on-device. Internet access is used for Google Ads/Billing services and optional informational JSON. The app does not request location, contacts, camera, microphone, or AccessibilityService access.
 
-The app uses Google Mobile Ads with official test units in development and a one-time non-consumable Play Billing product named `remove_ads_lifetime`. The production price is configured in Play Console; the code does not fake purchases or entitlement state. Restore queries Google Play to recover the ad-free entitlement.
+The app also uses boot, foreground-service, and notification permissions for configured local alerts and charge-monitoring behavior. Android and OEM battery restrictions may affect background reliability.
 
-## 🌐 Remote information
+## Build and test
 
-Optional announcements and compatibility information are fetched as size-limited, schema-checked HTTPS JSON and cached locally. They never deliver executable code, shell commands, or charge-control behavior. If the network is unavailable, the battery dashboard remains usable.
-
-## 🛠️ Build it
-
-Requires Android Studio with JDK 17 and Android SDK 34.
+Requires Android Studio, JDK 17, and Android SDK 34.
 
 ```bash
 git clone https://github.com/ritikthakur22/battery-info_app.git
 cd battery-info_app
 ./gradlew assembleDebug
+./gradlew test
 ./gradlew lint
 ```
 
-Release signing is intentionally local/secret-only. Put values in an ignored `keystore.properties` file when you need a signed build; the repository contains no signing credentials. AdMob test IDs must be replaced with production IDs before publishing.
+Application ID: `com.crdy.powergyan`  
+Version: `1.0.0`  
+Minimum Android version: API 29
 
-## 🔐 Privacy & license
+Release signing is local/secret-only. Use an ignored `keystore.properties` file for a signed build. Never commit keystores, passwords, local properties, or production credentials. Replace the sample AdMob application ID and configure the Play Billing product in Play Console before production distribution.
 
-Battery Gyan respects your privacy. It requests Internet access only for optional informational updates and Google services (Ads/Billing). Battery readings, local settings, Root checks, and charge-control data remain strictly on your device. 
+## Project structure
 
-**License:** All Rights Reserved. This project is closed-source and proprietary. Unauthorized distribution, modification, or commercial use is strictly prohibited.
+```text
+app/src/main/java/com/crdy/powergyan/
+├── data/             battery, settings, history, and remote repositories
+├── domain/model/     battery, alert, access, and charge-control models
+├── monetization/     AdMob and Play Billing integration
+├── platform/         Android battery, Root/Shizuku, and alert adapters
+├── service/          battery monitor and boot handling
+├── ui/               Compose home, details, settings, and theme
+└── widget/           Jetpack Glance widget and receiver
+```
+
+## Release
+
+The `v1.0.0` release contains the debug APK for physical testing:
+
+[Download PowerGyan v1.0.0](https://github.com/ritikthakur22/battery-info_app/releases/tag/v1.0.0)
+
+## License
+
+This repository currently contains a proprietary, closed-source `LICENSE` file. The README intentionally does not describe PowerGyan as GPL or open-source; licensing claims must match the actual license file.
+
+## Support
+
+- Email: [ritikthakur22in@gmail.com](mailto:ritikthakur22in@gmail.com)
+- GitHub: [github.com/ritikthakur22](https://github.com/ritikthakur22)
 
 <div align="center">
-<br />
-<img src="https://capsule-render.vercel.app/api?type=waving&color=211846&height=100&section=footer&animation=twinkling" width="100%" alt="Animated footer" />
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0B1A2A&height=100&section=footer&animation=twinkling" width="100%" alt="Animated footer" />
 </div>
