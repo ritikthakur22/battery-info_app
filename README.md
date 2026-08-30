@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=3689E8&height=190&section=header&text=PowerGyan&fontSize=54&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Charge%20Limiter%20%26%20Battery%20Analytics&descAlignY=62&descSize=16" width="100%" alt="PowerGyan banner" />
+<img src="docs/images/powergyan-feature-graphic.png" width="100%" alt="PowerGyan charge limiter and battery analytics banner" />
 
 <p><strong>PowerGyan - Charge Limiter &amp; Battery Analytics [Root]</strong></p>
 
@@ -69,7 +69,7 @@ The app also uses boot, foreground-service, and notification permissions for con
 
 ## Build and test
 
-Requires Android Studio, JDK 17, and Android SDK 34.
+Requires Android Studio, JDK 17, and Android SDK 35.
 
 ```bash
 git clone https://github.com/ritikthakur22/battery-info_app.git
@@ -100,7 +100,7 @@ app/src/main/java/com/crdy/powergyan/
 
 ## Release
 
-The `v1.0.0` release contains the debug APK for physical testing:
+The `v1.0.0` release contains the signed release APK and Play Console AAB:
 
 [Download PowerGyan v1.0.0](https://github.com/ritikthakur22/battery-info_app/releases/tag/v1.0.0)
 
