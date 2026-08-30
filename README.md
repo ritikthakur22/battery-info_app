@@ -20,6 +20,8 @@ PowerGyan is an Android battery dashboard for users who want clear battery infor
 
 This is the interface included in the `v1.0.0` APK. The generated feature image summarizes the product direction; the screenshots are captured from the running app.
 
+Play Console icon: [powergyan-app-icon.png](docs/images/powergyan-app-icon.png) — 512×512 PNG exported from the active adaptive launcher icon design.
+
 <div align="center">
 <img src="docs/images/powergyan-feature-hero.png" alt="PowerGyan battery analytics and charge control feature overview" width="860" />
 </div>
