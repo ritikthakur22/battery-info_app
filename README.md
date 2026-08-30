@@ -16,6 +16,27 @@
 
 PowerGyan is an Android battery dashboard for users who want clear battery information, local alerts, widgets, and optional capability-based charge control. Standard battery information works without Root, Shizuku, or Internet access.
 
+## App preview
+
+This is the interface included in the `v1.0.0` APK. The generated feature image summarizes the product direction; the screenshots are captured from the running app.
+
+<div align="center">
+<img src="docs/images/powergyan-feature-hero.png" alt="PowerGyan battery analytics and charge control feature overview" width="860" />
+</div>
+
+<table>
+<tr>
+<td align="center"><img src="docs/screenshots/home-dashboard.png" alt="PowerGyan home battery dashboard" width="220" /><br /><sub>Home dashboard</sub></td>
+<td align="center"><img src="docs/screenshots/navigation-drawer.png" alt="PowerGyan navigation drawer" width="220" /><br /><sub>Navigation drawer</sub></td>
+<td align="center"><img src="docs/screenshots/battery-details.png" alt="PowerGyan battery details and curve" width="220" /><br /><sub>Battery details</sub></td>
+</tr>
+<tr>
+<td align="center"><img src="docs/screenshots/settings-appearance.png" alt="PowerGyan appearance settings" width="220" /><br /><sub>Appearance settings</sub></td>
+<td align="center"><img src="docs/screenshots/charge-limiter-alarms.png" alt="PowerGyan charge limiter and alarms" width="220" /><br /><sub>Charge limiter and alarms</sub></td>
+<td align="center">⚡<br /><sub>Root and non-root capability paths</sub></td>
+</tr>
+</table>
+
 ## Features
 
 - Large battery percentage with charging and low-battery states.
