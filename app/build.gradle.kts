@@ -11,11 +11,11 @@ val signingProperties = Properties().apply {
 }
 
 android {
-    namespace = "com.crdy.batterygyan"
+    namespace = "com.crdy.powergyan"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.crdy.batterygyan"
+        applicationId = "com.crdy.powergyan"
         minSdk = 29
         targetSdk = 34
         versionCode = 1
@@ -78,6 +78,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation("com.google.android.material:material:1.11.0")
     
     // Glance
     implementation(libs.androidx.glance.appwidget)
