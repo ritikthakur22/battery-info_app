@@ -169,45 +169,6 @@ fun CustomizationScreen(viewModel: SettingsViewModel, settings: DisplaySettings)
             }
         }
 
-        // Temperature Control Section
-        Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
-            Column(Modifier.padding(16.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                    Text("Temperature Control (Experimental)", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                    Switch(
-                        checked = settings.smartChargeConfig.tempControlEnabled,
-                        onCheckedChange = { enabled -> 
-                            viewModel.updateSmartChargeConfig(settings.smartChargeConfig.copy(tempControlEnabled = enabled))
-                        }
-                    )
-                }
-                
-                Text("Enforce slow charging to cool device.", style = MaterialTheme.typography.bodySmall)
-                Spacer(Modifier.height(16.dp))
-                
-                val maxTemp = settings.smartChargeConfig.maxTempC.toFloat()
-                Text(
-                    "Throttle charge if above: ${maxTemp.toInt()}°C",
-                    color = MaterialTheme.colorScheme.error,
-                    fontWeight = FontWeight.Bold
-                )
-                Slider(
-                    value = maxTemp,
-                    onValueChange = { newTemp ->
-                        viewModel.updateSmartChargeConfig(
-                            settings.smartChargeConfig.copy(maxTempC = newTemp.toInt())
-                        )
-                    },
-                    valueRange = 35f..50f // Restrict overclocking, only allow normal boundaries
-                )
-                Text(
-                    "Warning: Aggressive throttling may significantly increase charging time. We strictly limit maximum allowable bounds for device safety.",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.error
-                )
-            }
-        }
-
         // Non-Root Alarm Section
         Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
             Column(Modifier.padding(16.dp)) {
@@ -326,6 +287,9 @@ fun CustomizationScreen(viewModel: SettingsViewModel, settings: DisplaySettings)
             }
         }
 
+        // Temperature Control Section (third)
+        TemperatureControlSection(viewModel = viewModel, settings = settings)
+
         // Safety Section
         Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
             Column(Modifier.padding(16.dp)) {
@@ -385,5 +349,46 @@ fun CustomizationScreen(viewModel: SettingsViewModel, settings: DisplaySettings)
             },
             dismissButton = { TextButton(onClick = { showResetConfirmation = false }) { Text("Cancel") } }
         )
+    }
+}
+
+@Composable
+private fun TemperatureControlSection(viewModel: SettingsViewModel, settings: DisplaySettings) {
+    Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
+        Column(Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                Text("Temperature Control (Experimental)", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                Switch(
+                    checked = settings.smartChargeConfig.tempControlEnabled,
+                    onCheckedChange = { enabled ->
+                        viewModel.updateSmartChargeConfig(settings.smartChargeConfig.copy(tempControlEnabled = enabled))
+                    }
+                )
+            }
+
+            Text("Enforce slow charging to cool device.", style = MaterialTheme.typography.bodySmall)
+            Spacer(Modifier.height(16.dp))
+
+            val maxTemp = settings.smartChargeConfig.maxTempC.toFloat()
+            Text(
+                "Throttle charge if above: ${maxTemp.toInt()}°C",
+                color = MaterialTheme.colorScheme.error,
+                fontWeight = FontWeight.Bold
+            )
+            Slider(
+                value = maxTemp,
+                onValueChange = { newTemp ->
+                    viewModel.updateSmartChargeConfig(
+                        settings.smartChargeConfig.copy(maxTempC = newTemp.toInt())
+                    )
+                },
+                valueRange = 35f..50f
+            )
+            Text(
+                "Warning: Aggressive throttling may significantly increase charging time. We strictly limit maximum allowable bounds for device safety.",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.error
+            )
+        }
     }
 }
