@@ -25,10 +25,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BatteryGyan"
         tools:targetApi="31">
-        <!-- Google's official sample App ID; replace with the production App ID before publishing. -->
+        <!-- PowerGyan AdMob App ID. Debug builds still use Google's test banner unit. -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713" />
+            android:value="ca-app-pub-7769132095029480~9777221549" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

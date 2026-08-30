@@ -27,7 +27,7 @@ PowerGyan is an Android battery dashboard for users who want clear battery infor
 - Verified Root detection and capability-based Smart Charge Control. Charge limiting is device and kernel dependent; unsupported devices are reported instead of receiving a false success state.
 - Separate Shizuku availability and permission detection. Shizuku is not treated as direct Root for sysfs charge control.
 - Optional temperature-control experiment with bounded settings and safety warnings.
-- Google Mobile Ads and a one-time `remove_ads_lifetime` Play Billing entitlement. Development builds use Google test ad units.
+- Google Mobile Ads and a one-time `remove_ads_lifetime` Play Billing entitlement. Debug builds use Google test inventory; release builds use the configured Home banner unit.
 - Optional HTTPS GitHub-hosted announcements and compatibility information with local caching. No executable code or shell commands are downloaded.
 
 ## Charge control safety
@@ -58,7 +58,7 @@ Application ID: `com.crdy.powergyan`
 Version: `1.0.0`  
 Minimum Android version: API 29
 
-Release signing is local/secret-only. Use an ignored `keystore.properties` file for a signed build. Never commit keystores, passwords, local properties, or production credentials. Replace the sample AdMob application ID and configure the Play Billing product in Play Console before production distribution.
+Release signing is local/secret-only. Use an ignored `keystore.properties` file for a signed build. Never commit keystores, passwords, local properties, or production credentials. Configure the Play Billing product in Play Console before production distribution. Do not click live production ads; use the debug build for ad testing.
 
 ## Project structure
 
