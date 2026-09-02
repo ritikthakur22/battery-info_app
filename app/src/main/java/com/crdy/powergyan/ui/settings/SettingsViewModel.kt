@@ -108,6 +108,13 @@ class SettingsViewModel(
     fun resetAllSettings() {
         viewModelScope.launch {
             settingsRepository.resetToDefaults()
+            runCatching {
+                val path = displaySettings.value.smartChargeConfig.ctrlPath
+                val enableVal = displaySettings.value.smartChargeConfig.ctrlEnable
+                Runtime.getRuntime().exec(arrayOf("su", "-c", "printf '$enableVal' > '$path'"))
+                Runtime.getRuntime().exec(arrayOf("su", "-c", "printf '0' > '/sys/class/power_supply/battery/input_suspend'"))
+                Runtime.getRuntime().exec(arrayOf("su", "-c", "printf '1' > '/sys/class/power_supply/battery/battery_charging_enabled'"))
+            }
             chargeLimitResult.value = chargeControlProvider.reset()
         }
     }

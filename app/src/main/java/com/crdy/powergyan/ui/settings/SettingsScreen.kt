@@ -157,12 +157,22 @@ fun SettingsScreen(
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                     Text("Q: Do I need Root?", fontWeight = FontWeight.Bold)
                     Text("A: Only for automatic charge limiting (stopping at 80%). The alarms and analytics work without root.")
-                    Spacer(Modifier.height(8.dp))
-                    Text("Q: How does the alarm work?", fontWeight = FontWeight.Bold)
-                    Text("A: It runs a silent background service and plays your selected sound when the battery hits the limit.")
-                    Spacer(Modifier.height(8.dp))
-                    Text("Q: Why is my battery graph empty?", fontWeight = FontWeight.Bold)
-                    Text("A: The graph needs at least a few minutes to start logging history points. Leave the app running in the background.")
+                    Spacer(Modifier.height(12.dp))
+                    
+                    Text("Q: How does Smart Charge Control work with Root?", fontWeight = FontWeight.Bold)
+                    Text("A: PowerGyan dynamically scans a massive internal database of control files (sysfs) to automatically support almost any rooted device out-of-the-box (Samsung, Pixel, OnePlus, Xiaomi). When your Stop Limit is reached, it executes a silent root command (e.g., su -c \"printf 1 > input_suspend\") to physically sever charging power at the kernel level!")
+                    Spacer(Modifier.height(12.dp))
+
+                    Text("Q: Why does it charge when I re-plug the cable below my stop limit?", fontWeight = FontWeight.Bold)
+                    Text("A: Smart Re-plug Logic! If your limits are 85% to 90%, and you plug the phone in at 87%, the app assumes you want power. It instantly overrides any previous pauses and forces charging up to 90%.")
+                    Spacer(Modifier.height(12.dp))
+
+                    Text("Q: Why does the notification say 'Monitoring' when unplugged?", fontWeight = FontWeight.Bold)
+                    Text("A: To bypass strict Android 12+ background execution limits (Doze mode), PowerGyan stays actively asleep in the background using a Foreground Service. This ensures that the exact millisecond you plug your phone in, it instantly enforces limits without you ever having to open the app. If you dislike the unplugged notification, simply hide it in Android Settings!")
+                    Spacer(Modifier.height(12.dp))
+
+                    Text("Q: How does Temperature Control work?", fontWeight = FontWeight.Bold)
+                    Text("A: It uses software-based thermal protection. PowerGyan continuously monitors the battery temperature. If it exceeds your limit (e.g. 40°C), it applies the exact same sysfs cutoff method as Smart Charge Control to block charging entirely, allowing the device to physically cool down.")
                 }
             },
             confirmButton = {

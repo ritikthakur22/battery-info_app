@@ -12,11 +12,12 @@ import kotlinx.coroutines.launch
 
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action == Intent.ACTION_BOOT_COMPLETED || intent.action == Intent.ACTION_LOCKED_BOOT_COMPLETED) {
+        val action = intent.action ?: return
+        if (action == Intent.ACTION_BOOT_COMPLETED || action == Intent.ACTION_LOCKED_BOOT_COMPLETED || action == Intent.ACTION_POWER_CONNECTED) {
             val settingsStore = SettingsDataStore(context)
             CoroutineScope(Dispatchers.IO).launch {
                 val settings = settingsStore.displaySettings.first()
-                if (settings.alertPolicy.enabled) {
+                if (settings.alertPolicy.enabled || settings.smartChargeConfig.enabled) {
                     val serviceIntent = Intent(context, BatteryMonitorService::class.java)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         context.startForegroundService(serviceIntent)
@@ -24,7 +25,6 @@ class BootReceiver : BroadcastReceiver() {
                         context.startService(serviceIntent)
                     }
                 }
-                // TODO: Re-apply Shizuku/Root charge limits here when added to DataStore
             }
         }
     }

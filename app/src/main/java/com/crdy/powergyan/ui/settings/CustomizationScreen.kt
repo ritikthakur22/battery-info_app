@@ -64,6 +64,15 @@ fun CustomizationScreen(viewModel: SettingsViewModel, settings: DisplaySettings)
                             viewModel.updateSmartChargeConfig(settings.smartChargeConfig.copy(enabled = enabled))
                             if (enabled) {
                             } else {
+                                val config = settings.smartChargeConfig
+                                val path = config.ctrlPath
+                                val enableVal = config.ctrlEnable
+                                runCatching {
+                                    Runtime.getRuntime().exec(arrayOf("su", "-c", "printf '$enableVal' > '$path'"))
+                                    if (path.endsWith("battery_charging_enabled")) {
+                                        Runtime.getRuntime().exec(arrayOf("su", "-c", "printf '0' > '/sys/class/power_supply/battery/input_suspend'"))
+                                    }
+                                }
                                 viewModel.resetChargeLimit()
                             }
                         }
@@ -83,7 +92,7 @@ fun CustomizationScreen(viewModel: SettingsViewModel, settings: DisplaySettings)
                     Slider(
                         value = stopAt,
                         onValueChange = { newStop ->
-                            val newResume = minOf(resumeAt.toInt(), newStop.toInt() - 5)
+                            val newResume = minOf(resumeAt.toInt(), newStop.toInt() - 1)
                             viewModel.updateSmartChargeConfig(
                                 settings.smartChargeConfig.copy(
                                     stopLimit = newStop.toInt(),
@@ -98,13 +107,13 @@ fun CustomizationScreen(viewModel: SettingsViewModel, settings: DisplaySettings)
                     Slider(
                         value = resumeAt,
                         onValueChange = { newResume ->
-                            if (newResume <= stopAt - 5) {
+                            if (newResume <= stopAt - 1) {
                                 viewModel.updateSmartChargeConfig(
                                     settings.smartChargeConfig.copy(resumeLimit = newResume.toInt())
                                 )
                             }
                         },
-                        valueRange = 20f..minOf(95f, stopAt - 5f)
+                        valueRange = 20f..minOf(99f, stopAt - 1f)
                     )
 
                     val chargeResult by viewModel.chargeLimitResult.collectAsState()
