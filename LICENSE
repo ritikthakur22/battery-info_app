@@ -1,6 +1,17 @@
+Source-Available Proprietary License — Personal Inspection Only / No Unauthorized Reuse or Commercial Use
+
 Copyright (c) 2026. All Rights Reserved.
 
-This software and associated documentation files (the "Software") are proprietary and closed-source. 
-You may not copy, modify, distribute, sell, or lease any part of the Software, nor may you reverse engineer or attempt to extract the source code of the Software.
+1. PERMITTED USE
+You are permitted to download and inspect the available source code of this repository for personal, educational, and auditing purposes only. 
 
-Any unauthorized use, reproduction, or distribution of this Software is strictly prohibited.
+2. RESTRICTIONS
+You may NOT:
+- Modify, adapt, or create derivative works from this software.
+- Distribute, publish, or share the source code or any compiled binaries (APKs/AABs) derived from it.
+- Use the code, in whole or in part, within another project, application, or service.
+- Use the software for any commercial purposes or financial gain.
+- Reverse engineer, decompile, or attempt to extract omitted proprietary logic from the provided files or compiled binaries.
+
+3. NO WARRANTY
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

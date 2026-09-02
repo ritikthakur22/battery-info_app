@@ -58,6 +58,28 @@ Play Console feature graphic: [powergyan-feature-graphic.png](docs/images/powerg
 - Google Mobile Ads and a one-time `remove_ads_lifetime` Play Billing entitlement. Debug builds use Google test inventory; release builds use the configured Home banner unit.
 - Optional HTTPS GitHub-hosted announcements and compatibility information with local caching. No executable code or shell commands are downloaded.
 
+
+## How to Use (Documentation)
+
+### 1. Smart Charge Control (Requires Root)
+To automatically limit your charging to prolong battery lifespan:
+1. Open the app and grant **Root** permissions when prompted.
+2. Navigate to **Settings > Smart Charge Control**.
+3. Toggle the Master Switch to **On**.
+4. Set your **Stop Limit** (e.g., 80%) and **Resume Limit** (e.g., 75%).
+*Note: Once the limit is hit, the hardware PMIC cuts off power. If you physically re-plug the cable while the battery is between the Stop and Resume limits, the app's Smart Re-plug Logic will instantly resume charging up to the Stop Limit.*
+
+### 2. Temperature Protection
+1. Enable **Temperature Control** in the settings.
+2. Set a maximum safe temperature (e.g., 40°C).
+3. If the battery exceeds this limit while plugged in, charging will be forcefully paused to allow physical cooldown.
+
+### 3. Battery & Cable Alarms
+1. Under the **Alarms** tab, enable limits for Full or Low battery.
+2. Select your preferred system ringtone or custom audio file.
+3. When an alarm triggers, a fullscreen popup will appear even if your phone is locked. You must tap the giant **Stop** button on the screen to dismiss it.
+4. You can also enable discrete **Plug-in** and **Plug-out** chimes to confirm your charger is seated correctly.
+
 ## Charge control safety
 
 Smart Charge Control requires a verified Root capability and a supported charging-control interface. The app validates the requested stop/resume relationship, checks the interface, writes only the configured value, reads it back, and reports failure when it cannot verify the result. Hardware and OEM support is not universal.
@@ -88,18 +110,11 @@ Minimum Android version: API 29
 
 Release signing is local/secret-only. Use an ignored `keystore.properties` file for a signed build. Never commit keystores, passwords, local properties, or production credentials. Configure the Play Billing product in Play Console before production distribution. Do not click live production ads; use the debug build for ad testing.
 
-## Project structure
+## Project structure (Source-Available)
 
-```text
-app/src/main/java/com/crdy/powergyan/
-├── data/             battery, settings, history, and remote repositories
-├── domain/model/     battery, alert, access, and charge-control models
-├── monetization/     AdMob and Play Billing integration
-├── platform/         Android battery, Root/Shizuku, and alert adapters
-├── service/          battery monitor and boot handling
-├── ui/               Compose home, details, settings, and theme
-└── widget/           Jetpack Glance widget and receiver
-```
+This repository operates on a **Source-Available** model. To protect the intellectual property and core algorithms of PowerGyan, this repository is not fully open-sourced, nor is it fully closed-source. 
+
+Certain structural files, UI components, and build scripts are visible for transparency and personal inspection. However, proprietary source codes, backend logic, and critical algorithmic files within the `app/src/` directory are deliberately un-tracked and omitted from this public repository.
 
 ## Release
 
@@ -109,7 +124,9 @@ The `v1.0.2` release contains the signed release APK and Play Console AAB:
 
 ## License
 
-This repository currently contains a proprietary, closed-source `LICENSE` file. The README intentionally does not describe PowerGyan as GPL or open-source; licensing claims must match the actual license file.
+**Source-Available Proprietary License — Personal Inspection Only / No Unauthorized Reuse or Commercial Use**
+
+This software is strictly proprietary. By accessing this repository, you are granted permission to download and inspect the available source files for personal, educational, or auditing purposes. You may **NOT** modify, reuse, distribute, decompile, or commercially exploit any part of this software, its source code, or its compiled binaries. Please read the `LICENSE` file for the full legal terms.
 
 ## Support
 
