@@ -18,7 +18,7 @@ PowerGyan is an Android battery dashboard for users who want clear battery infor
 
 ## App preview
 
-This is the interface included in the `v1.0.0` APK. The generated feature image summarizes the product direction; the screenshots are captured from the running app.
+This is the interface included in the `v1.0.2` APK. The generated feature image summarizes the product direction; the screenshots are captured from the running app.
 
 Play Console icon: [powergyan-app-icon.png](docs/images/powergyan-app-icon.png) — 512×512 PNG exported from the active adaptive launcher icon design.
 
@@ -49,6 +49,9 @@ Play Console feature graphic: [powergyan-feature-graphic.png](docs/images/powerg
 - Configurable battery, plug, and unplug alerts with system sounds or local audio files.
 - Material 3 interface with light/dark/system themes, accent presets, adjustable text and icon scale, and accessible native controls.
 - Jetpack Glance widget with percentage, status, and secondary battery information.
+- Universal Auto-Detect Engine: Dynamically scans a massive database of internal sysfs paths to support almost any rooted device out-of-the-box.
+- Smart Re-plug Logic & Hardware PMIC Cutoffs: Stops charging at the hardware level with a millisecond USB debouncer to prevent hardware bounce.
+- Background Doze Bypass: Uses a specialized Android 10+ FullScreenIntent for alarms and maintains background presence to catch cable events instantly.
 - Verified Root detection and capability-based Smart Charge Control. Charge limiting is device and kernel dependent; unsupported devices are reported instead of receiving a false success state.
 - Separate Shizuku availability and permission detection. Shizuku is not treated as direct Root for sysfs charge control.
 - Optional temperature-control experiment with bounded settings and safety warnings.
@@ -69,7 +72,7 @@ The app also uses boot, foreground-service, and notification permissions for con
 
 ## Build and test
 
-Requires Android Studio, JDK 17, and Android SDK 35.
+Requires Android Studio, JDK 17, and Android SDK 36 (Android 16).
 
 ```bash
 git clone https://github.com/ritikthakur22/battery-info_app.git
@@ -80,7 +83,7 @@ cd battery-info_app
 ```
 
 Application ID: `com.crdy.powergyan`  
-Version: `1.0.0`  
+Version: `1.0.2`  
 Minimum Android version: API 29
 
 Release signing is local/secret-only. Use an ignored `keystore.properties` file for a signed build. Never commit keystores, passwords, local properties, or production credentials. Configure the Play Billing product in Play Console before production distribution. Do not click live production ads; use the debug build for ad testing.
@@ -100,9 +103,9 @@ app/src/main/java/com/crdy/powergyan/
 
 ## Release
 
-The `v1.0.0` release contains the signed release APK and Play Console AAB:
+The `v1.0.2` release contains the signed release APK and Play Console AAB:
 
-[Download PowerGyan v1.0.0](https://github.com/ritikthakur22/battery-info_app/releases/tag/v1.0.0)
+[Download PowerGyan v1.0.2](https://github.com/ritikthakur22/battery-info_app/releases/tag/v1.0.2)
 
 ## License
 
