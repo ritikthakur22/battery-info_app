@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
@@ -127,6 +128,46 @@ fun BatteryDetailsScreen(showAds: Boolean = false, homeViewModel: HomeViewModel)
                 }
             }
             
+            
+            // Battery Cycles Block
+            batteryState?.cycleCount?.let { cycles ->
+                item {
+                    MetricCard(
+                        title = "Charge Cycles",
+                        value = "$cycles",
+                        subtext = "Full 100% equivalent loops",
+                        icon = Icons.Filled.Refresh,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+            
+            // Time Left Block
+            batteryState?.let { snapshot ->
+                if (snapshot.status == BatteryStatus.CHARGING && snapshot.currentUa != null && snapshot.chargeCounterUah != null && snapshot.currentUa != 0) {
+                    val currentMa = Math.abs(snapshot.currentUa) / 1000
+                    val capacityMah = snapshot.chargeCounterUah / 1000
+                    val totalMah = if (snapshot.percentage > 0) (capacityMah * 100) / snapshot.percentage else 0
+                    val target = 100
+                    if (target > snapshot.percentage && currentMa > 0 && totalMah > 0) {
+                        val missingMah = totalMah * (target - snapshot.percentage) / 100
+                        val hoursLeft = missingMah.toFloat() / currentMa.toFloat()
+                        val minsLeft = (hoursLeft * 60).toInt()
+                        if (minsLeft in 1..600) {
+                            item {
+                                MetricCard(
+                                    title = "Est. Time Left",
+                                    value = "~$minsLeft mins",
+                                    subtext = "To reach $target%",
+                                    icon = Icons.Filled.Info,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            
             item {
                 MetricCard(
                     title = "Last Charged Time",
@@ -138,24 +179,7 @@ fun BatteryDetailsScreen(showAds: Boolean = false, homeViewModel: HomeViewModel)
             }
         }
         
-        item {
-            Card(
-                modifier = Modifier.fillMaxWidth().height(250.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                Column(Modifier.padding(16.dp)) {
-                    Text("Charge/Discharge Curve", style = MaterialTheme.typography.titleMedium)
-                    Spacer(Modifier.height(16.dp))
-                    if (history.isEmpty()) {
-                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text("Not enough data yet. Leave the app running!")
-                        }
-                    } else {
-                        BatteryGraph(history)
-                    }
-                }
-            }
-        }
+
         
         if (showAds) {
             item {
@@ -279,47 +303,6 @@ fun AnimatedHealthBox(health: BatteryHealth) {
                 Text("Battery Health", color = Color.White, style = MaterialTheme.typography.labelLarge)
                 Text(text, color = Color.White, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
             }
-        }
-    }
-}
-
-@Composable
-fun BatteryGraph(history: List<HistoryPoint>) {
-    val lineColor = MaterialTheme.colorScheme.primary
-    val gridColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
-    val reveal = remember { Animatable(0f) }
-    LaunchedEffect(history) {
-        reveal.snapTo(0f)
-        reveal.animateTo(1f, animationSpec = tween(1400, easing = FastOutSlowInEasing))
-    }
-    val glowAlpha = 0.18f + (0.08f * reveal.value)
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        val width = size.width
-        val height = size.height
-
-        val minTime = history.first().timestamp
-        val maxTime = history.last().timestamp.coerceAtLeast(minTime + 1000)
-        val timeRange = maxTime - minTime
-
-        val points = history.map { point ->
-            val x = ((point.timestamp - minTime).toFloat() / timeRange) * width
-            val y = height - ((point.level.toFloat() / 100f) * height)
-            androidx.compose.ui.geometry.Offset(x, y)
-        }
-        for (gridIndex in 1..4) {
-            val fraction = gridIndex / 4f
-            val y = height - (height * fraction)
-            drawLine(gridColor, androidx.compose.ui.geometry.Offset(0f, y), androidx.compose.ui.geometry.Offset(width, y), 1.dp.toPx())
-        }
-        val path = Path()
-        val visibleCount = (points.size * reveal.value).coerceAtLeast(1f).toInt().coerceAtMost(points.size)
-        points.take(visibleCount).forEachIndexed { index, point ->
-            if (index == 0) path.moveTo(point.x, point.y) else path.lineTo(point.x, point.y)
-        }
-        drawPath(path = path, color = lineColor.copy(alpha = glowAlpha), style = Stroke(width = 12.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
-        drawPath(path = path, color = lineColor, style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
-        points.lastOrNull()?.let { point ->
-            drawCircle(lineColor, radius = 7.dp.toPx(), center = point)
         }
     }
 }

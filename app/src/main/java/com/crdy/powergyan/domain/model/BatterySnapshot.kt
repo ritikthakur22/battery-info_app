@@ -23,5 +23,6 @@ data class BatterySnapshot(
     val energyNwh: Long?,
     val technology: String?,
     val health: BatteryHealth?,
-    val timestamp: Long
+    val timestamp: Long,
+    val cycleCount: Int? = null
 )

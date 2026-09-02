@@ -17,6 +17,42 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.onStart
 
+
+    private fun getCycleCount(context: Context): Int? {
+        // Try Android 14+ BatteryManager API first
+        if (android.os.Build.VERSION.SDK_INT >= 34) { // Android 14 (U)
+            runCatching {
+                val bm = context.getSystemService(Context.BATTERY_SERVICE) as? android.os.BatteryManager
+                val cycles = bm?.getIntProperty(6) ?: -1 // 6 = BATTERY_PROPERTY_CYCLE_COUNT
+                if (cycles > 0) return cycles
+            }
+        }
+        
+        // Try direct sysfs read (works on some OEMs without root)
+        runCatching {
+            val file = java.io.File("/sys/class/power_supply/battery/cycle_count")
+            if (file.exists() && file.canRead()) {
+                val text = file.readText().trim()
+                val cycles = text.toInt()
+                if (cycles > 0) return cycles
+            }
+        }
+        
+        // Try root shell if direct read fails
+        runCatching {
+            val process = Runtime.getRuntime().exec(arrayOf("su", "-c", "cat /sys/class/power_supply/battery/cycle_count"))
+            val reader = java.io.BufferedReader(java.io.InputStreamReader(process.inputStream))
+            val text = reader.readLine()?.trim()
+            process.waitFor()
+            if (!text.isNullOrEmpty()) {
+                val cycles = text.toInt()
+                if (cycles > 0) return cycles
+            }
+        }
+        
+        return null
+    }
+
 class AndroidBatteryDataSource(
     private val context: Context,
     private val alertController: BatteryAlertController? = null,
@@ -116,7 +152,8 @@ class AndroidBatteryDataSource(
             energyNwh = energyNwh,
             technology = intent.getStringExtra(BatteryManager.EXTRA_TECHNOLOGY),
             health = health,
-            timestamp = System.currentTimeMillis()
+            timestamp = System.currentTimeMillis(),
+            cycleCount = getCycleCount(context)
         )
     }
 
@@ -132,7 +169,8 @@ class AndroidBatteryDataSource(
             energyNwh = null,
             technology = null,
             health = BatteryHealth.UNKNOWN,
-            timestamp = System.currentTimeMillis()
+            timestamp = System.currentTimeMillis(),
+            cycleCount = getCycleCount(context)
         )
     }
 }

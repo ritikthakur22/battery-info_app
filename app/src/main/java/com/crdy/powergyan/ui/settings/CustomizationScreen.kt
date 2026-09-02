@@ -33,6 +33,7 @@ fun CustomizationScreen(viewModel: SettingsViewModel, settings: DisplaySettings)
     val capabilities by viewModel.capabilities.collectAsState()
     val scrollState = rememberScrollState()
     var showRebootConfirmation by remember { mutableStateOf(false) }
+    val advancedAccessReady = capabilities.rootAvailable
     var showResetConfirmation by remember { mutableStateOf(false) }
     var soundPickerTarget by remember { mutableStateOf<String?>(null) }
 
@@ -79,7 +80,7 @@ fun CustomizationScreen(viewModel: SettingsViewModel, settings: DisplaySettings)
                     )
                 }
                 
-                val advancedAccessReady = capabilities.rootAvailable
+                
                 if (!advancedAccessReady) {
                     Text("Requires verified Root for charge control", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
                     Spacer(Modifier.height(8.dp))
@@ -297,7 +298,7 @@ fun CustomizationScreen(viewModel: SettingsViewModel, settings: DisplaySettings)
         }
 
         // Temperature Control Section (third)
-        TemperatureControlSection(viewModel = viewModel, settings = settings)
+        TemperatureControlSection(viewModel = viewModel, settings = settings, isRooted = advancedAccessReady)
 
         // Safety Section
         Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
@@ -362,7 +363,7 @@ fun CustomizationScreen(viewModel: SettingsViewModel, settings: DisplaySettings)
 }
 
 @Composable
-private fun TemperatureControlSection(viewModel: SettingsViewModel, settings: DisplaySettings) {
+private fun TemperatureControlSection(viewModel: SettingsViewModel, settings: DisplaySettings, isRooted: Boolean) {
     Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
         Column(Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
@@ -370,12 +371,20 @@ private fun TemperatureControlSection(viewModel: SettingsViewModel, settings: Di
                 Switch(
                     checked = settings.smartChargeConfig.tempControlEnabled,
                     onCheckedChange = { enabled ->
-                        viewModel.updateSmartChargeConfig(settings.smartChargeConfig.copy(tempControlEnabled = enabled))
-                    }
+                        if (isRooted) {
+                            viewModel.updateSmartChargeConfig(settings.smartChargeConfig.copy(tempControlEnabled = enabled))
+                        }
+                    },
+                    enabled = isRooted
                 )
             }
 
-            Text("Enforce slow charging to cool device.", style = MaterialTheme.typography.bodySmall)
+            if (!isRooted) {
+                Text("Requires verified Root for temperature control", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                Spacer(Modifier.height(8.dp))
+            } else {
+                Text("Enforce slow charging to cool device.", style = MaterialTheme.typography.bodySmall)
+            }
             Spacer(Modifier.height(16.dp))
 
             val maxTemp = settings.smartChargeConfig.maxTempC.toFloat()

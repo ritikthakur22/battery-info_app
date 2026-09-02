@@ -125,75 +125,60 @@ class MainActivity : ComponentActivity() {
 
             PowerGyanTheme(darkTheme = darkTheme, accentColor = accent) {
                 var currentScreen by remember { mutableStateOf(0) } // 0=Home, 1=Battery Details, 2=Customization, 3=Settings
-                val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-                val scope = rememberCoroutineScope()
+                
+                
 
-                ModalNavigationDrawer(
-                    drawerState = drawerState,
-                    drawerContent = {
-                        ModalDrawerSheet {
-                            Text("PowerGyan", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.headlineMedium)
-                            HorizontalDivider()
-                            NavigationDrawerItem(
-                                label = { Text("Home") },
+                Scaffold(
+                    topBar = {
+                        TopAppBar(
+                            title = { 
+                                Text(
+                                    when (currentScreen) {
+                                        0 -> "PowerGyan"
+                                        1 -> "Analytics"
+                                        2 -> "Control"
+                                        else -> "Settings"
+                                    }
+                                ) 
+                            }
+                        )
+                    },
+                    bottomBar = {
+                        NavigationBar {
+                            NavigationBarItem(
                                 selected = currentScreen == 0,
-                                onClick = { currentScreen = 0; scope.launch { drawerState.close() } },
+                                onClick = { currentScreen = 0 },
                                 icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
-                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                                label = { Text("Home") }
                             )
-                            NavigationDrawerItem(
-                                label = { Text("Battery Details") },
+                            NavigationBarItem(
                                 selected = currentScreen == 1,
-                                onClick = { currentScreen = 1; scope.launch { drawerState.close() } },
-                                icon = { Icon(Icons.Filled.Info, contentDescription = "Battery Details") },
-                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                                onClick = { currentScreen = 1 },
+                                icon = { Icon(androidx.compose.material.icons.Icons.Filled.Info, contentDescription = "Analytics") },
+                                label = { Text("Analytics") }
                             )
-                            NavigationDrawerItem(
-                                label = { Text("Charge Limiter") },
+                            NavigationBarItem(
                                 selected = currentScreen == 2,
-                                onClick = { currentScreen = 2; scope.launch { drawerState.close() } },
-                                icon = { Icon(Icons.Filled.Build, contentDescription = "Charge Limiter") },
-                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                                onClick = { currentScreen = 2 },
+                                icon = { Icon(androidx.compose.material.icons.Icons.Filled.Build, contentDescription = "Control") },
+                                label = { Text("Control") }
                             )
-                            NavigationDrawerItem(
-                                label = { Text("Settings") },
+                            NavigationBarItem(
                                 selected = currentScreen == 3,
-                                onClick = { currentScreen = 3; scope.launch { drawerState.close() } },
+                                onClick = { currentScreen = 3 },
                                 icon = { Icon(Icons.Filled.Settings, contentDescription = "Settings") },
-                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                                label = { Text("Settings") }
                             )
                         }
                     }
-                ) {
-                    Scaffold(
-                        topBar = {
-                            TopAppBar(
-                                title = { 
-                                    Text(
-                                        when (currentScreen) {
-                                            0 -> "PowerGyan"
-                                            1 -> "Battery Details"
-                                            2 -> "Charge Limiter"
-                                            else -> "Settings"
-                                        }
-                                    ) 
-                                },
-                                navigationIcon = {
-                                    IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                        Icon(Icons.Filled.Menu, contentDescription = "Menu")
-                                    }
-                                }
-                            )
-                        }
-                    ) { innerPadding ->
-                        Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
-                            AnimatedContent(targetState = currentScreen, label = "screen transition") { screen ->
-                                when (screen) {
-                                    0 -> HomeScreen(viewModel = homeViewModel, settings = settings, showAds = !removeAds)
-                                    1 -> BatteryDetailsScreen(showAds = !removeAds, homeViewModel = homeViewModel)
-                                    2 -> CustomizationScreen(viewModel = settingsViewModel, settings = settings)
-                                    3 -> SettingsScreen(viewModel = settingsViewModel, removeAds = removeAds, onRemoveAds = { billingManager.launchRemoveAds(this@MainActivity) }, onRestoreAds = billingManager::restorePurchases)
-                                }
+                ) { innerPadding ->
+                    Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
+                        AnimatedContent(targetState = currentScreen, label = "screen transition") { screen ->
+                            when (screen) {
+                                0 -> HomeScreen(viewModel = homeViewModel, settings = settings, showAds = !removeAds)
+                                1 -> BatteryDetailsScreen(showAds = !removeAds, homeViewModel = homeViewModel)
+                                2 -> CustomizationScreen(viewModel = settingsViewModel, settings = settings)
+                                3 -> SettingsScreen(viewModel = settingsViewModel, removeAds = removeAds, onRemoveAds = { billingManager.launchRemoveAds(this@MainActivity) }, onRestoreAds = billingManager::restorePurchases)
                             }
                         }
                     }
