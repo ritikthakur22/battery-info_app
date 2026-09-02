@@ -12,14 +12,14 @@ val signingProperties = Properties().apply {
 
 android {
     namespace = "com.crdy.powergyan"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.crdy.powergyan"
         minSdk = 29
-        targetSdk = 35
-        versionCode = 3
-        versionName = "1.0.1"
+        targetSdk = 36
+        versionCode = 4
+        versionName = "1.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
