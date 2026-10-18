@@ -18,7 +18,7 @@ PowerGyan is an Android battery dashboard for users who want clear battery infor
 
 ## App preview
 
-This is the interface included in the `v1.0.4` APK. The generated feature image summarizes the product direction; the screenshots are captured from the running app.
+This is the interface included in the `v1.0.5` APK. The generated feature image summarizes the product direction; the screenshots are captured from the running app.
 
 Play Console icon: [powergyan-app-icon.png](docs/images/powergyan-app-icon.png), a 512×512 PNG exported from the adaptive launcher icon.
 
@@ -95,7 +95,7 @@ cd battery-info_app
 ```
 
 Application ID: `com.crdy.powergyan`  
-Version: `1.0.4` (Version Code: 4)  
+Version: `1.0.5` (Version Code: 5)  
 Minimum Android version: API 29
 
 Release signing is local/secret-only. Use an ignored `keystore.properties` file for a signed build. Never commit keystores, passwords, local properties, or production credentials.
@@ -108,9 +108,9 @@ Certain structural files, UI components, and build scripts are visible for trans
 
 ## Release
 
-The `v1.0.4` release contains the signed release APK and Play Console AAB:
+The `v1.0.5` release contains the signed release APK and Play Console AAB:
 
-[Download PowerGyan v1.0.4](https://github.com/ritikthakur22/battery-info_app/releases/tag/v1.0.4)
+[Download PowerGyan v1.0.5](https://github.com/ritikthakur22/battery-info_app/releases/tag/v1.0.5)
 
 ## License
 
