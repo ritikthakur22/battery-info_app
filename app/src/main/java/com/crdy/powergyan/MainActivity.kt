@@ -110,12 +110,17 @@ class MainActivity : ComponentActivity() {
                                 Text(
                                     when (currentScreen) {
                                         0 -> "PowerGyan"
-                                        1 -> "Analytics"
-                                        2 -> "Control"
-                                        else -> "Settings"
-                                    }
+                                        1 -> "Battery Analytics"
+                                        2 -> "Charge Control"
+                                        else -> "Preferences"
+                                    },
+                                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
                                 ) 
-                            }
+                            },
+                            colors = TopAppBarDefaults.topAppBarColors(
+                                containerColor = MaterialTheme.colorScheme.background,
+                                titleContentColor = MaterialTheme.colorScheme.onBackground
+                            )
                         )
                     },
                     bottomBar = {
