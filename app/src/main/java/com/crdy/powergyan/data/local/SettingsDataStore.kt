@@ -17,6 +17,7 @@ import com.crdy.powergyan.domain.model.SmartChargeConfig
 import com.crdy.powergyan.domain.model.ThemeMode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 
@@ -43,6 +44,9 @@ class SettingsDataStore(private val context: Context) : SettingsRepository {
         val SC_TEMP_MAX = androidx.datastore.preferences.core.intPreferencesKey("sc_temp_max")
         val PLUG_SOUND_URI = stringPreferencesKey("plug_sound_uri")
         val UNPLUG_SOUND_URI = stringPreferencesKey("unplug_sound_uri")
+        val LOW_THRESHOLD = androidx.datastore.preferences.core.intPreferencesKey("low_threshold")
+        val SC_WIRELESS_STOP = androidx.datastore.preferences.core.intPreferencesKey("sc_wireless_stop")
+        val SC_FULL_BY = androidx.datastore.preferences.core.intPreferencesKey("sc_full_by")
     }
 
     override val displaySettings: Flow<DisplaySettings> = context.dataStore.data
@@ -71,7 +75,8 @@ class SettingsDataStore(private val context: Context) : SettingsRepository {
                 threshold = (preferences[PreferencesKeys.ALERT_THRESHOLD] ?: 20f).toInt(),
                 customSoundUri = preferences[PreferencesKeys.CUSTOM_SOUND_URI],
                 plugSoundUri = preferences[PreferencesKeys.PLUG_SOUND_URI],
-                unplugSoundUri = preferences[PreferencesKeys.UNPLUG_SOUND_URI]
+                unplugSoundUri = preferences[PreferencesKeys.UNPLUG_SOUND_URI],
+                lowThreshold = preferences[PreferencesKeys.LOW_THRESHOLD] ?: 0
             )
             val configuredPath = preferences[PreferencesKeys.SC_PATH] ?: "/sys/class/power_supply/battery/input_suspend"
             val configuredEnable = preferences[PreferencesKeys.SC_ENABLE_VAL] ?: "0"
@@ -86,7 +91,9 @@ class SettingsDataStore(private val context: Context) : SettingsRepository {
                 ctrlEnable = if (inputSuspendDefaultsWereInherited) "0" else configuredEnable,
                 ctrlDisable = if (inputSuspendDefaultsWereInherited) "1" else configuredDisable,
                 tempControlEnabled = preferences[PreferencesKeys.SC_TEMP_ENABLED] ?: false,
-                maxTempC = preferences[PreferencesKeys.SC_TEMP_MAX] ?: 40
+                maxTempC = preferences[PreferencesKeys.SC_TEMP_MAX] ?: 40,
+                wirelessStopLimit = preferences[PreferencesKeys.SC_WIRELESS_STOP] ?: 0,
+                fullByMinute = preferences[PreferencesKeys.SC_FULL_BY] ?: -1
             )
 
             DisplaySettings(
@@ -129,6 +136,7 @@ class SettingsDataStore(private val context: Context) : SettingsRepository {
             if (policy.customSoundUri != null) preferences[PreferencesKeys.CUSTOM_SOUND_URI] = policy.customSoundUri else preferences.remove(PreferencesKeys.CUSTOM_SOUND_URI)
             if (policy.plugSoundUri != null) preferences[PreferencesKeys.PLUG_SOUND_URI] = policy.plugSoundUri else preferences.remove(PreferencesKeys.PLUG_SOUND_URI)
             if (policy.unplugSoundUri != null) preferences[PreferencesKeys.UNPLUG_SOUND_URI] = policy.unplugSoundUri else preferences.remove(PreferencesKeys.UNPLUG_SOUND_URI)
+            preferences[PreferencesKeys.LOW_THRESHOLD] = policy.lowThreshold
         }
     }
 
@@ -154,7 +162,17 @@ class SettingsDataStore(private val context: Context) : SettingsRepository {
             preferences[PreferencesKeys.SC_DISABLE_VAL] = config.ctrlDisable
             preferences[PreferencesKeys.SC_TEMP_ENABLED] = config.tempControlEnabled
             preferences[PreferencesKeys.SC_TEMP_MAX] = config.maxTempC
+            preferences[PreferencesKeys.SC_WIRELESS_STOP] = config.wirelessStopLimit
+            preferences[PreferencesKeys.SC_FULL_BY] = config.fullByMinute
         }
+    }
+
+    override suspend fun exportBackup(): String = SettingsBackup.toJson(context.dataStore.data.first())
+
+    override suspend fun importBackup(json: String): Boolean {
+        var ok = false
+        context.dataStore.edit { ok = SettingsBackup.apply(json, it) }
+        return ok
     }
 
     override suspend fun resetToDefaults() {

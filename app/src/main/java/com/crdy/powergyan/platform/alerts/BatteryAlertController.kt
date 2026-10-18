@@ -8,7 +8,11 @@ import com.crdy.powergyan.domain.model.AlertPolicy
 import com.crdy.powergyan.domain.model.BatterySnapshot
 
 /** Foreground-safe, edge-triggered built-in alerts. */
-class BatteryAlertController(private val context: Context, private val onTriggerAlarm: (() -> Unit)? = null) {
+class BatteryAlertController(
+    private val context: Context,
+    private val onTriggerAlarm: (() -> Unit)? = null,
+    private val onLowBattery: ((Int) -> Unit)? = null
+) {
     enum class PreviewState { PLAYING, PAUSED, STOPPED }
     private val prefs = context.getSharedPreferences("alert_edges", Context.MODE_PRIVATE)
 
@@ -57,7 +61,8 @@ class BatteryAlertController(private val context: Context, private val onTrigger
         val crossedTarget = snapshot.status == com.crdy.powergyan.domain.model.BatteryStatus.CHARGING &&
             previousLevel in 0 until policy.safeThreshold && snapshot.percentage >= policy.safeThreshold &&
             !prefs.getBoolean("target_latched", false)
-        val crossedFull = snapshot.percentage >= 100 && !prefs.getBoolean("full_latched", false)
+        val pluggedIn = snapshot.plugged != com.crdy.powergyan.domain.model.PluggedState.NONE
+        val crossedFull = pluggedIn && snapshot.percentage >= 100 && !prefs.getBoolean("full_latched", false)
         
         if (crossedTarget || crossedFull) {
             play(policy.customSoundUri, loop = true)
@@ -71,6 +76,14 @@ class BatteryAlertController(private val context: Context, private val onTrigger
         
         if (snapshot.percentage < policy.safeThreshold) prefs.edit().putBoolean("target_latched", false).apply()
         if (snapshot.percentage < 100) prefs.edit().putBoolean("full_latched", false).apply()
+
+        // Low battery: warn once per discharge when crossing the level downward.
+        val low = policy.lowThreshold
+        if (low > 0 && !pluggedIn && previousLevel > low && snapshot.percentage <= low && !prefs.getBoolean("low_latched", false)) {
+            prefs.edit().putBoolean("low_latched", true).apply()
+            onLowBattery?.invoke(snapshot.percentage)
+        }
+        if (pluggedIn || snapshot.percentage > low) prefs.edit().putBoolean("low_latched", false).apply()
         prefs.edit().putInt("battery_level", snapshot.percentage).apply()
     }
 

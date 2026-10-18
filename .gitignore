@@ -20,4 +20,17 @@ local.properties
 *.keystore
 keystore.properties
 play-store-api-key.json
-app/src/
+
+# Local release outputs
+*.apk
+*.aab
+*.log
+
+# Proprietary core modules omitted from public source-available repository
+app/src/main/java/com/crdy/powergyan/platform/access/ChargeSwitch.kt
+app/src/main/java/com/crdy/powergyan/domain/model/ChargeDecision.kt
+app/src/main/java/com/crdy/powergyan/data/local/history/UsageTracker.kt
+app/src/main/java/com/crdy/powergyan/data/local/SettingsBackup.kt
+app/src/main/java/com/crdy/powergyan/service/SmartChargeTileService.kt
+app/src/test/
+

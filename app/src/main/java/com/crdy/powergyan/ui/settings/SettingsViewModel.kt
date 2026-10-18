@@ -9,12 +9,16 @@ import com.crdy.powergyan.domain.model.ThemeMode
 import com.crdy.powergyan.domain.model.AccentColor
 import com.crdy.powergyan.domain.model.AccessCapabilities
 import com.crdy.powergyan.domain.model.ChargeLimitResult
-import com.crdy.powergyan.domain.model.ChargeLimitValidator
 import com.crdy.powergyan.domain.model.AlertPolicy
 import com.crdy.powergyan.platform.access.CapabilityDetector
-import com.crdy.powergyan.platform.access.ChargeControlProvider
+import com.crdy.powergyan.data.BatteryRepository
+import com.crdy.powergyan.domain.model.BatteryStatus
+import com.crdy.powergyan.domain.model.PluggedState
+import com.crdy.powergyan.platform.access.ChargeSwitch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
-import rikka.shizuku.Shizuku
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -23,7 +27,7 @@ import kotlinx.coroutines.launch
 class SettingsViewModel(
     private val settingsRepository: SettingsRepository,
     private val capabilityDetector: CapabilityDetector,
-    private val chargeControlProvider: ChargeControlProvider
+    private val batteryRepository: BatteryRepository
 ) : ViewModel() {
 
     val capabilities = MutableStateFlow(AccessCapabilities())
@@ -82,51 +86,73 @@ class SettingsViewModel(
         viewModelScope.launch { capabilities.value = capabilityDetector.detect() }
     }
 
-    fun requestShizukuPermission() {
-        if (capabilities.value.shizukuAvailable && !capabilities.value.shizukuPermissionGranted) {
-            runCatching { Shizuku.requestPermission(1001) }
-        }
+    fun setLowThreshold(value: Int) {
+        viewModelScope.launch { settingsRepository.updateAlertPolicy(displaySettings.value.alertPolicy.copy(lowThreshold = value)) }
     }
 
-    fun setChargeLimit(stopAt: Int, resumeAt: Int) {
-        val error = ChargeLimitValidator.validate(stopAt, resumeAt)
-        if (error != null) {
-            chargeLimitResult.value = ChargeLimitResult(false, error)
-            return
-        }
-        viewModelScope.launch { chargeLimitResult.value = chargeControlProvider.writeStopLimit(stopAt) }
-    }
-
+    /** Turns charging back on through the same control file the service uses. */
     fun resetChargeLimit() {
-        viewModelScope.launch { chargeLimitResult.value = chargeControlProvider.reset() }
+        val config = displaySettings.value.smartChargeConfig
+        viewModelScope.launch { chargeLimitResult.value = restoreCharging(config) }
     }
+
+    private suspend fun restoreCharging(config: com.crdy.powergyan.domain.model.SmartChargeConfig) = withContext(Dispatchers.IO) {
+        val target = ChargeSwitch.detect(config) ?: return@withContext null
+        if (ChargeSwitch.set(target, true)) ChargeLimitResult(true, "Charging is back to normal.")
+        else ChargeLimitResult(false, "Couldn't turn charging back on. Restarting the phone always restores it.")
+    }
+
+    /** Pauses charging for a few seconds and checks that Android sees it stop. */
+    fun testChargeControl() {
+        val config = displaySettings.value.smartChargeConfig
+        viewModelScope.launch {
+            chargeLimitResult.value = ChargeLimitResult(true, "Testing. Keep the charger plugged in…")
+            chargeLimitResult.value = withContext(Dispatchers.IO) { runChargeTest(config) }
+        }
+    }
+
+    private suspend fun runChargeTest(config: com.crdy.powergyan.domain.model.SmartChargeConfig): ChargeLimitResult {
+        val before = batteryRepository.getBatterySnapshot()
+        if (before.plugged == PluggedState.NONE) return ChargeLimitResult(false, "Plug in your charger, then run the test.")
+        if (before.status != BatteryStatus.CHARGING) return ChargeLimitResult(false, "Run the test while the phone is charging, below your stop level.")
+        val target = ChargeSwitch.detect(config) ?: return ChargeLimitResult(false, "No charging control file found. Set one manually below.")
+        ChargeSwitch.testInProgress = true
+        try {
+            if (!ChargeSwitch.set(target, false)) return ChargeLimitResult(false, "Root write to ${target.path} failed.")
+            delay(6000)
+            val stopped = batteryRepository.getBatterySnapshot().status != BatteryStatus.CHARGING
+            return if (stopped) ChargeLimitResult(true, "Works. Charging paused through ${target.path}.")
+            else ChargeLimitResult(false, "Charging didn't stop with ${target.path}. Try another control file.")
+        } finally {
+            ChargeSwitch.set(target, true)
+            ChargeSwitch.testInProgress = false
+        }
+    }
+
+    suspend fun exportSettings(): String = settingsRepository.exportBackup()
+
+    suspend fun importSettings(json: String): Boolean = settingsRepository.importBackup(json)
 
     fun toggleSecondaryInfo(enabled: Boolean) {
         viewModelScope.launch { settingsRepository.toggleSecondaryInfo(enabled) }
     }
 
     fun resetAllSettings() {
+        val config = displaySettings.value.smartChargeConfig
         viewModelScope.launch {
             settingsRepository.resetToDefaults()
-            runCatching {
-                val path = displaySettings.value.smartChargeConfig.ctrlPath
-                val enableVal = displaySettings.value.smartChargeConfig.ctrlEnable
-                Runtime.getRuntime().exec(arrayOf("su", "-c", "printf '$enableVal' > '$path'"))
-                Runtime.getRuntime().exec(arrayOf("su", "-c", "printf '0' > '/sys/class/power_supply/battery/input_suspend'"))
-                Runtime.getRuntime().exec(arrayOf("su", "-c", "printf '1' > '/sys/class/power_supply/battery/battery_charging_enabled'"))
-            }
-            chargeLimitResult.value = chargeControlProvider.reset()
+            chargeLimitResult.value = restoreCharging(config)
         }
     }
 
     class Factory(
         private val settingsRepository: SettingsRepository,
         private val capabilityDetector: CapabilityDetector,
-        private val chargeControlProvider: ChargeControlProvider
+        private val batteryRepository: BatteryRepository
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return SettingsViewModel(settingsRepository, capabilityDetector, chargeControlProvider) as T
+            return SettingsViewModel(settingsRepository, capabilityDetector, batteryRepository) as T
         }
     }
 }

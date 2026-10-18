@@ -15,5 +15,7 @@ interface SettingsRepository {
     suspend fun resetToDefaults()
     suspend fun updateThemeMode(mode: com.crdy.powergyan.domain.model.ThemeMode)
     suspend fun toggleSecondaryInfo(enabled: Boolean)
-    // Additional update methods can be added as needed
+    suspend fun exportBackup(): String
+    /** Returns false if [json] isn't a valid PowerGyan backup; nothing is changed then. */
+    suspend fun importBackup(json: String): Boolean
 }

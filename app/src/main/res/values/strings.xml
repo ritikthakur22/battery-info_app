@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">PowerGyan - Charge Limiter &amp; Analytics [Root]</string>
+    <!-- Short label for launchers, notifications and Settings; the longer Play title lives in fastlane/title.txt -->
+    <string name="app_name">PowerGyan</string>
+    <string name="widget_description">Battery level, charging status and the last 24 hours</string>
 </resources>

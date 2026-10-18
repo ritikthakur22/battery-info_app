@@ -10,8 +10,6 @@ import com.crdy.powergyan.domain.model.BatteryHealth
 import com.crdy.powergyan.domain.model.BatterySnapshot
 import com.crdy.powergyan.domain.model.BatteryStatus
 import com.crdy.powergyan.domain.model.PluggedState
-import com.crdy.powergyan.platform.alerts.BatteryAlertController
-import com.crdy.powergyan.domain.model.AlertPolicy
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -19,14 +17,6 @@ import kotlinx.coroutines.flow.onStart
 
 
     private fun getCycleCount(context: Context): Int? {
-        // Try Android 14+ BatteryManager API first
-        if (android.os.Build.VERSION.SDK_INT >= 34) { // Android 14 (U)
-            runCatching {
-                val bm = context.getSystemService(Context.BATTERY_SERVICE) as? android.os.BatteryManager
-                val cycles = bm?.getIntProperty(6) ?: -1 // 6 = BATTERY_PROPERTY_CYCLE_COUNT
-                if (cycles > 0) return cycles
-            }
-        }
         
         // Try direct sysfs read (works on some OEMs without root)
         runCatching {
@@ -53,11 +43,22 @@ import kotlinx.coroutines.flow.onStart
         return null
     }
 
-class AndroidBatteryDataSource(
-    private val context: Context,
-    private val alertController: BatteryAlertController? = null,
-    private val alertPolicy: () -> AlertPolicy = { AlertPolicy() }
-) : BatteryRepository {
+class AndroidBatteryDataSource(private val context: Context) : BatteryRepository {
+    // shortcut: sysfs/su fallback read once per instance; stale until app restart, fine since cycles change slowly.
+    private val fallbackCycleCount: Int? by lazy { getCycleCount(context) }
+    private val designCapacityMah: Int? by lazy { readDesignCapacity() }
+
+    private fun readDesignCapacity(): Int? {
+        runCatching {
+            val uah = java.io.File("/sys/class/power_supply/battery/charge_full_design").readText().trim().toLong()
+            if (uah > 0) return (if (uah > 100_000) uah / 1000 else uah).toInt()
+        }
+        // Hidden but long-stable API that most battery apps rely on; fails quietly if blocked.
+        return runCatching {
+            val profile = Class.forName("com.android.internal.os.PowerProfile").getConstructor(Context::class.java).newInstance(context)
+            (profile.javaClass.getMethod("getBatteryCapacity").invoke(profile) as Double).toInt()
+        }.getOrNull()?.takeIf { it > 500 }
+    }
 
     override suspend fun getBatterySnapshot(): BatterySnapshot {
         val filter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
@@ -69,10 +70,7 @@ class AndroidBatteryDataSource(
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 if (intent.action == Intent.ACTION_BATTERY_CHANGED) {
-                    parseBatteryIntent(intent).also { snapshot ->
-                        alertController?.onSnapshot(snapshot, alertPolicy())
-                        trySend(snapshot)
-                    }
+                    trySend(parseBatteryIntent(intent))
                 }
             }
         }
@@ -132,8 +130,10 @@ class AndroidBatteryDataSource(
         val voltageMv = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1).takeIf { it > 0 }
 
         val batteryManager = context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+        // shortcut: some kernels report mA instead of µA; anything under 10 mA-as-µA is treated as mA.
         val currentUa = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
             .takeIf { it != Int.MIN_VALUE && it != 0 }
+            ?.let { if (Math.abs(it) < 10_000) it * 1000 else it }
         val chargeCounterUah = batteryManager
             .getIntProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER)
             .takeIf { it > 0 }
@@ -153,7 +153,8 @@ class AndroidBatteryDataSource(
             technology = intent.getStringExtra(BatteryManager.EXTRA_TECHNOLOGY),
             health = health,
             timestamp = System.currentTimeMillis(),
-            cycleCount = getCycleCount(context)
+            cycleCount = intent.getIntExtra(BatteryManager.EXTRA_CYCLE_COUNT, -1).takeIf { it > 0 } ?: fallbackCycleCount,
+            designCapacityMah = designCapacityMah
         )
     }
 
@@ -170,7 +171,7 @@ class AndroidBatteryDataSource(
             technology = null,
             health = BatteryHealth.UNKNOWN,
             timestamp = System.currentTimeMillis(),
-            cycleCount = getCycleCount(context)
+            cycleCount = fallbackCycleCount
         )
     }
 }

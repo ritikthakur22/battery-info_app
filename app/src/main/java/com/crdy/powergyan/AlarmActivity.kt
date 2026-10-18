@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.crdy.powergyan.service.BatteryMonitorService
+import com.crdy.powergyan.ui.theme.PowerGyanTheme
 
 class AlarmActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,10 +38,10 @@ class AlarmActivity : ComponentActivity() {
         }
 
         setContent {
-            MaterialTheme {
+            PowerGyanTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.primaryContainer
+                    color = MaterialTheme.colorScheme.background
                 ) {
                     Column(
                         modifier = Modifier.fillMaxSize(),
@@ -48,10 +49,15 @@ class AlarmActivity : ComponentActivity() {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "Charge Target Reached!",
-                            fontSize = 28.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                            text = "Charging target reached",
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Unplug your charger to keep the battery healthy.",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(modifier = Modifier.height(32.dp))
                         Button(
@@ -65,7 +71,7 @@ class AlarmActivity : ComponentActivity() {
                             },
                             modifier = Modifier.size(160.dp, 64.dp)
                         ) {
-                            Text("Stop Alarm", fontSize = 18.sp)
+                            Text("Stop alarm", style = MaterialTheme.typography.titleMedium)
                         }
                     }
                 }

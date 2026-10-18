@@ -18,8 +18,8 @@ android {
         applicationId = "com.crdy.powergyan"
         minSdk = 29
         targetSdk = 36
-        versionCode = 3
-        versionName = "1.0.3"
+        versionCode = 4
+        versionName = "1.0.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -91,14 +91,10 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
-    // Monetization and optional advanced-access integrations.
-    implementation(libs.play.services.ads)
-    implementation(libs.user.messaging.platform)
-    implementation(libs.play.billing.ktx)
-    implementation(libs.shizuku.api)
-    implementation(libs.shizuku.provider)
 
     testImplementation(libs.junit)
+    // Real org.json for JVM tests; Android's copy is a stub off-device.
+    testImplementation(libs.org.json)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

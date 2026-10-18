@@ -18,14 +18,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.CircleShape
 import com.crdy.powergyan.domain.model.AccentColor
 import com.crdy.powergyan.domain.model.ThemeMode
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import com.crdy.powergyan.data.local.history.BatteryHistoryHelper
+import com.crdy.powergyan.data.local.history.toCsv
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import com.crdy.powergyan.BuildConfig
+import com.crdy.powergyan.ui.theme.color
+import com.crdy.powergyan.ui.theme.contentOn
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen(
-    viewModel: SettingsViewModel,
-    removeAds: Boolean = false,
-    onRemoveAds: () -> Unit = {},
-    onRestoreAds: () -> Unit = {}
+    viewModel: SettingsViewModel
 ) {
     val settings by viewModel.displaySettings.collectAsState()
     val context = LocalContext.current
@@ -37,34 +44,34 @@ fun SettingsScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Appearance
-        Card(modifier = Modifier.fillMaxWidth()) {
+        Surface(color = MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp)) {
                 Text("Appearance", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(16.dp))
                 
-                Text("Theme Mode", style = MaterialTheme.typography.labelMedium)
+                Text("Theme", style = MaterialTheme.typography.labelMedium)
                 FlowRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     ThemeMode.values().forEach { mode ->
                         FilterChip(
                             selected = settings.themeMode == mode,
                             onClick = { viewModel.setThemeMode(mode) },
-                            label = { Text(mode.name) }
+                            label = { Text(mode.name.lowercase().replaceFirstChar { it.uppercase() }) }
                         )
                     }
                 }
                 
                 Spacer(Modifier.height(16.dp))
-                Text("Accent Color", style = MaterialTheme.typography.labelMedium)
+                Text("Accent color", style = MaterialTheme.typography.labelMedium)
                 FlowRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     AccentColor.values().forEach { color ->
-                        val previewColor = color.previewColor()
+                        val previewColor = color.color()
                         FilterChip(
                             selected = settings.accentColor == color,
                             onClick = { viewModel.setAccentColor(color) },
-                            label = { Text(color.name) },
+                            label = { Text(color.displayName()) },
                             leadingIcon = {
                                 Box(
                                     Modifier.size(16.dp).background(previewColor, CircleShape)
@@ -75,8 +82,8 @@ fun SettingsScreen(
                                 labelColor = previewColor,
                                 iconColor = previewColor,
                                 selectedContainerColor = previewColor,
-                                selectedLabelColor = Color.White,
-                                selectedLeadingIconColor = Color.White
+                                selectedLabelColor = contentOn(previewColor),
+                                selectedLeadingIconColor = contentOn(previewColor)
                             )
                         )
                     }
@@ -84,66 +91,33 @@ fun SettingsScreen(
             }
         }
 
+        DataSection(viewModel)
+
         // About Section
-        // Ad Removal
-        if (!removeAds) {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(16.dp)) {
-                    Text("Support the Developer", style = MaterialTheme.typography.titleMedium)
-                    Spacer(Modifier.height(8.dp))
-                    Button(onClick = onRemoveAds, modifier = Modifier.fillMaxWidth()) {
-                        Text("Remove Ads ($1.50)")
-                    }
-                    TextButton(onClick = onRestoreAds, modifier = Modifier.fillMaxWidth()) {
-                        Text("Restore Purchases")
-                    }
-                }
-            }
-        }
-        Card(modifier = Modifier.fillMaxWidth()) {
+        Surface(color = MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp)) {
                 Text("About PowerGyan", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(8.dp))
-                
-                Text("Version: v1.0", style = MaterialTheme.typography.bodyMedium)
-                Text("Package: com.crdy.powergyan", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                
-                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
-                
-                AboutItem("App Details", "Advanced battery monitoring and smart charge limitation tool.")
-                
-                AboutItem("FAQs", "Find answers to commonly asked questions.", onClick = { showFaqDialog = true })
-                
-                AboutItem("Contact Support", "ritikthakur22in@gmail.com", onClick = {
-                    val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:ritikthakur22in@gmail.com"))
-                    context.startActivity(intent)
-                })
-                
-                AboutItem("Developer GitHub", "github.com/ritikthakur22", onClick = {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/ritikthakur22"))
-                    context.startActivity(intent)
-                })
+                Text("Version ${BuildConfig.VERSION_NAME}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
-                AboutItem("License", "Proprietary software — All rights reserved", onClick = {
-                    showLicenseDialog = true
+                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+
+                AboutItem("Questions and answers", "How charge control, alarms and root access work", onClick = { showFaqDialog = true })
+                AboutItem("Email support", SUPPORT_EMAIL, onClick = {
+                    context.openSafely(Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:$SUPPORT_EMAIL")))
                 })
-                
+                AboutItem("Privacy policy", "What PowerGyan reads and where it's kept", onClick = {
+                    context.openSafely(Intent(Intent.ACTION_VIEW, Uri.parse(PRIVACY_URL)))
+                })
+                AboutItem("Terms and conditions", "Root use, warranty and liability", onClick = {
+                    context.openSafely(Intent(Intent.ACTION_VIEW, Uri.parse(TERMS_URL)))
+                })
+                AboutItem("License", "Proprietary software. All rights reserved.", onClick = { showLicenseDialog = true })
+
                 Spacer(Modifier.height(12.dp))
-                Button(onClick = { 
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.crdy.powergyan"))
-                    context.startActivity(intent)
+                OutlinedButton(onClick = {
+                    context.openSafely(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=${context.packageName}")))
                 }, modifier = Modifier.fillMaxWidth()) {
-                    Text("Rate Us on Play Store")
-                }
-                
-                Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-                    TextButton(onClick = { 
-                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://example.com/terms")))
-                    }) { Text("Terms & Conditions") }
-                    
-                    TextButton(onClick = { 
-                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://example.com/privacy")))
-                    }) { Text("Privacy Policy") }
+                    Text("Rate on Google Play")
                 }
             }
         }
@@ -154,25 +128,19 @@ fun SettingsScreen(
             onDismissRequest = { showFaqDialog = false },
             title = { Text("Frequently Asked Questions") },
             text = {
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    Text("Q: Do I need Root?", fontWeight = FontWeight.Bold)
-                    Text("A: Only for automatic charge limiting (stopping at 80%). The alarms and analytics work without root.")
-                    Spacer(Modifier.height(12.dp))
-                    
-                    Text("Q: How does Smart Charge Control work with Root?", fontWeight = FontWeight.Bold)
-                    Text("A: PowerGyan dynamically scans a massive internal database of control files (sysfs) to automatically support almost any rooted device out-of-the-box (Samsung, Pixel, OnePlus, Xiaomi). When your Stop Limit is reached, it executes a silent root command (e.g., su -c \"printf 1 > input_suspend\") to physically sever charging power at the kernel level!")
-                    Spacer(Modifier.height(12.dp))
-
-                    Text("Q: Why does it charge when I re-plug the cable below my stop limit?", fontWeight = FontWeight.Bold)
-                    Text("A: Smart Re-plug Logic! If your limits are 85% to 90%, and you plug the phone in at 87%, the app assumes you want power. It instantly overrides any previous pauses and forces charging up to 90%.")
-                    Spacer(Modifier.height(12.dp))
-
-                    Text("Q: Why does the notification say 'Monitoring' when unplugged?", fontWeight = FontWeight.Bold)
-                    Text("A: To bypass strict Android 12+ background execution limits (Doze mode), PowerGyan stays actively asleep in the background using a Foreground Service. This ensures that the exact millisecond you plug your phone in, it instantly enforces limits without you ever having to open the app. If you dislike the unplugged notification, simply hide it in Android Settings!")
-                    Spacer(Modifier.height(12.dp))
-
-                    Text("Q: How does Temperature Control work?", fontWeight = FontWeight.Bold)
-                    Text("A: It uses software-based thermal protection. PowerGyan continuously monitors the battery temperature. If it exceeds your limit (e.g. 40°C), it applies the exact same sysfs cutoff method as Smart Charge Control to block charging entirely, allowing the device to physically cool down.")
+                Column(modifier = Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    FaqItem("Do I need root?",
+                        "Only for Smart Charge and pausing when hot. Battery details, the charge graph and alarms work on any phone.")
+                    FaqItem("How does Smart Charge stop charging?",
+                        "With root, PowerGyan writes to your phone's charging control file in the kernel, the same switch tools like ACC use. It knows the common files on Qualcomm, Samsung, Pixel and MediaTek phones. Tap Test charge control in Control to confirm it works on yours.")
+                    FaqItem("What if the test fails?",
+                        "Your phone uses a control file PowerGyan doesn't know yet. Find it in the ACC project's list for your device and enter it under Control > Set control file.")
+                    FaqItem("Why does it charge when I plug in below my stop level?",
+                        "Plugging in always starts charging up to your stop level, even if you're above the resume level. That way the phone charges when you expect it to.")
+                    FaqItem("Why is there always a notification?",
+                        "Android only lets apps react to the charger in the background while they show a notification. You can hide it in Android settings without stopping PowerGyan.")
+                    FaqItem("What if I uninstall the app while charging is paused?",
+                        "PowerGyan turns charging back on when you unplug, turn off Smart Charge, or the monitor stops. If charging ever stays off, restarting the phone always restores it.")
                 }
             },
             confirmButton = {
@@ -189,7 +157,7 @@ fun SettingsScreen(
             title = { Text("License") },
             text = {
                 Text(
-                    "Copyright (c) 2026. All Rights Reserved.\n\n" +
+                    "Copyright © 2026 Ritik Thakur. All rights reserved.\n\n" +
                         "PowerGyan and its associated documentation are proprietary and closed-source. " +
                         "You may not copy, modify, distribute, sell, lease, or reverse engineer any part " +
                         "of the software without permission."
@@ -204,12 +172,86 @@ fun SettingsScreen(
     }
 }
 
-private fun AccentColor.previewColor() = when (this) {
-    AccentColor.MINT -> Color(0xFF00A889)
-    AccentColor.BLUE -> Color(0xFF3689E8)
-    AccentColor.VIOLET -> Color(0xFF7655D6)
-    AccentColor.ORANGE -> Color(0xFFE88A28)
-    AccentColor.ROSE -> Color(0xFFD94C72)
+private const val SUPPORT_EMAIL = "ritikthakur22in@gmail.com"
+// Read-only /view form of the shared Google Docs.
+private const val PRIVACY_URL = "https://docs.google.com/document/d/1QGNcFZdpkSznkoxDnnDj6n2Ws_I4q6oQTI017QCWK1A/view"
+private const val TERMS_URL = "https://docs.google.com/document/d/1ivVeCogN6e01vrlg085nzoY6cxOPtGOYPNbz6jILQA8/view"
+
+private fun AccentColor.displayName() = when (this) {
+    AccentColor.MINT -> "Mint"
+    AccentColor.BLUE -> "Cobalt"
+    AccentColor.VIOLET -> "Violet"
+    AccentColor.ORANGE -> "Amber"
+    AccentColor.ROSE -> "Rose"
+}
+
+/** Opens [intent] if any app can handle it, instead of crashing on phones without one. */
+private fun Context.openSafely(intent: Intent) {
+    runCatching { startActivity(intent) }.onFailure {
+        android.widget.Toast.makeText(this, "No app found to open this", android.widget.Toast.LENGTH_SHORT).show()
+    }
+}
+
+/** Export history and back up / restore settings through the system file picker (no storage permission). */
+@Composable
+private fun DataSection(viewModel: SettingsViewModel) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    fun toast(text: String) = android.widget.Toast.makeText(context, text, android.widget.Toast.LENGTH_SHORT).show()
+    val today = remember { java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date()) }
+
+    fun write(uri: Uri, text: suspend () -> String, done: String) = scope.launch {
+        val ok = withContext(Dispatchers.IO) {
+            runCatching { context.contentResolver.openOutputStream(uri, "wt")!!.use { it.write(text().toByteArray()) } }.isSuccess
+        }
+        toast(if (ok) done else "Couldn't save the file. Try another location.")
+    }
+
+    val csvLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
+        uri?.let { write(it, { BatteryHistoryHelper(context).getHistory().toCsv() }, "History exported") }
+    }
+    val backupLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
+        uri?.let { write(it, { viewModel.exportSettings() }, "Settings backed up") }
+    }
+    val restoreLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        scope.launch {
+            val text = withContext(Dispatchers.IO) {
+                // Settings files are tiny; cap the read so a wrong pick can't load something huge.
+                runCatching { context.contentResolver.openInputStream(uri)!!.use { String(it.readNBytesCompat(64 * 1024)) } }.getOrNull()
+            }
+            toast(if (text != null && viewModel.importSettings(text)) "Settings restored" else "That file isn't a PowerGyan backup")
+        }
+    }
+
+    Surface(color = MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp)) {
+            Text("Your data", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(8.dp))
+            AboutItem("Export battery history", "The last 24 hours as a CSV spreadsheet", onClick = { csvLauncher.launch("powergyan-history-$today.csv") })
+            AboutItem("Back up settings", "Save your limits, alarms and theme to a file", onClick = { backupLauncher.launch("powergyan-settings-$today.json") })
+            AboutItem("Restore settings", "Load a backup file. Alarm sounds go back to default.", onClick = { restoreLauncher.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) })
+        }
+    }
+}
+
+private fun java.io.InputStream.readNBytesCompat(max: Int): ByteArray {
+    val out = java.io.ByteArrayOutputStream()
+    val buf = ByteArray(8192)
+    while (out.size() < max) {
+        val n = read(buf, 0, minOf(buf.size, max - out.size()))
+        if (n < 0) break
+        out.write(buf, 0, n)
+    }
+    return out.toByteArray()
+}
+
+@Composable
+private fun FaqItem(question: String, answer: String) {
+    Column {
+        Text(question, fontWeight = FontWeight.SemiBold)
+        Text(answer, style = MaterialTheme.typography.bodyMedium)
+    }
 }
 
 @Composable

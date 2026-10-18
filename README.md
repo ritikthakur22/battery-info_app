@@ -14,13 +14,13 @@
 
 </div>
 
-PowerGyan is an Android battery dashboard for users who want clear battery information, local alerts, widgets, and optional capability-based charge control. Standard battery information works without Root, Shizuku, or Internet access.
+PowerGyan is an Android battery dashboard for users who want clear battery information, local alerts, widgets, and optional capability-based charge control. Standard battery information works without root or internet access.
 
 ## App preview
 
-This is the interface included in the `v1.0.2` APK. The generated feature image summarizes the product direction; the screenshots are captured from the running app.
+This is the interface included in the `v1.0.4` APK. The generated feature image summarizes the product direction; the screenshots are captured from the running app.
 
-Play Console icon: [powergyan-app-icon.png](docs/images/powergyan-app-icon.png) — 512×512 PNG exported from the active adaptive launcher icon design.
+Play Console icon: [powergyan-app-icon.png](docs/images/powergyan-app-icon.png), a 512×512 PNG exported from the adaptive launcher icon.
 
 Play Console feature graphic: [powergyan-feature-graphic.png](docs/images/powergyan-feature-graphic.png) — 1024×500 RGB PNG.
 
@@ -43,54 +43,44 @@ Play Console feature graphic: [powergyan-feature-graphic.png](docs/images/powerg
 
 ## Features
 
-- Large battery percentage with charging and low-battery states.
-- Voltage, current, charge counter, energy, temperature, health, plug type, technology, and battery history where the device exposes them.
-- Battery details with a visual charge/discharge curve and last-charge information when enough history exists.
-- Configurable battery, plug, and unplug alerts with system sounds or local audio files.
-- Material 3 interface with light/dark/system themes, accent presets, adjustable text and icon scale, and accessible native controls.
-- Jetpack Glance widget with percentage, status, and secondary battery information.
-- Universal Auto-Detect Engine: Dynamically scans a massive database of internal sysfs paths to support almost any rooted device out-of-the-box.
-- Smart Re-plug Logic & Hardware PMIC Cutoffs: Stops charging at the hardware level with a millisecond USB debouncer to prevent hardware bounce.
-- Background Doze Bypass: Uses a specialized Android 10+ FullScreenIntent for alarms and maintains background presence to catch cable events instantly.
-- Verified Root detection and capability-based Smart Charge Control. Charge limiting is device and kernel dependent; unsupported devices are reported instead of receiving a false success state.
-- Separate Shizuku availability and permission detection. Shizuku is not treated as direct Root for sysfs charge control.
-- Optional temperature-control experiment with bounded settings and safety warnings.
-- Google Mobile Ads and a one-time `remove_ads_lifetime` Play Billing entitlement. Debug builds use Google test inventory; release builds use the configured Home banner unit.
-- Optional HTTPS GitHub-hosted announcements and compatibility information with local caching. No executable code or shell commands are downloaded.
+**Works on any phone**
+- Live battery percentage, status, power (W), temperature, voltage, current and charge cycles where the phone reports them.
+- 24-hour battery graph, charging-speed chart (power at each battery level) and time-to-full estimate.
+- Battery wear: estimated capacity compared with the design capacity.
+- Screen-on vs screen-off drain rate since you last unplugged.
+- Charge alarm at a chosen level and at 100%, low-battery warning, and plug/unplug sounds (system sounds or your own files).
+- Home-screen widget with level, status and a 24-hour line.
+- Export battery history as CSV; back up and restore settings to a file.
+- Light, dark and system themes with five accent colors.
 
+**With root (Magisk, KernelSU or APatch)**
+- Smart Charge: stop charging at a level and start again when it drops.
+- Lower stop level on wireless chargers.
+- Full by a set time: hold at your limit overnight, then top up to 100% before you wake.
+- Pause charging when the battery is hot, with 2°C hysteresis.
+- Built-in control files for common Qualcomm, Samsung, Pixel and MediaTek kernels, a manual override, and a **Test charge control** button that checks it works on your phone.
+- Quick Settings tile to turn Smart Charge on and off.
 
-## How to Use (Documentation)
+## How to use
 
-### 1. Smart Charge Control (Requires Root)
-To automatically limit your charging to prolong battery lifespan:
-1. Open the app and grant **Root** permissions when prompted.
-2. Navigate to **Settings > Smart Charge Control**.
-3. Toggle the Master Switch to **On**.
-4. Set your **Stop Limit** (e.g., 80%) and **Resume Limit** (e.g., 75%).
-*Note: Once the limit is hit, the hardware PMIC cuts off power. If you physically re-plug the cable while the battery is between the Stop and Resume limits, the app's Smart Re-plug Logic will instantly resume charging up to the Stop Limit.*
+### Smart Charge (root)
+1. Grant PowerGyan root access in your root manager.
+2. Open **Control**, turn on **Smart Charge** and set the stop and start-again levels.
+3. While charging, tap **Test charge control** to confirm your phone's control file works.
+4. Plugging in between the two levels always charges up to the stop level.
 
-### 2. Temperature Protection
-1. Enable **Temperature Control** in the settings.
-2. Set a maximum safe temperature (e.g., 40°C).
-3. If the battery exceeds this limit while plugged in, charging will be forcefully paused to allow physical cooldown.
-
-### 3. Battery & Cable Alarms
-1. Under the **Alarms** tab, enable limits for Full or Low battery.
-2. Select your preferred system ringtone or custom audio file.
-3. When an alarm triggers, a fullscreen popup will appear even if your phone is locked. You must tap the giant **Stop** button on the screen to dismiss it.
-4. You can also enable discrete **Plug-in** and **Plug-out** chimes to confirm your charger is seated correctly.
+### Alarms (no root)
+1. Open **Control** and turn on **Battery alarms**.
+2. Pick the level to ring at, an optional low-battery warning, and sounds.
+3. The charge alarm shows full screen, even on the lock screen, until you tap **Stop alarm**.
 
 ## Charge control safety
 
-Smart Charge Control requires a verified Root capability and a supported charging-control interface. The app validates the requested stop/resume relationship, checks the interface, writes only the configured value, reads it back, and reports failure when it cannot verify the result. Hardware and OEM support is not universal.
-
-The default stop/resume values are 80% and 75%. Reset and reboot actions are protected by confirmation dialogs. Do not enable charge control unless you understand the device-specific risks and have tested the result on your phone.
+Charge control depends on your phone's kernel and isn't universal. Values are validated before they reach `su`. PowerGyan turns charging back on when you unplug, turn off Smart Charge, or the monitor stops. If charging ever stays off (for example after a force stop), restarting the phone restores it.
 
 ## Privacy and permissions
 
-Core battery readings, settings, local audio selections, and history remain on-device. Internet access is used for Google Ads/Billing services and optional informational JSON. The app does not request location, contacts, camera, microphone, or AccessibilityService access.
-
-The app also uses boot, foreground-service, and notification permissions for configured local alerts and charge-monitoring behavior. Android and OEM battery restrictions may affect background reliability.
+PowerGyan has no internet permission, no ads, no analytics and no accounts. Battery history and settings stay on the phone. It uses notification, boot, foreground-service and full-screen-alarm permissions for monitoring and alarms, and optional root only to switch charging. It doesn't request location, contacts, camera, microphone or accessibility access.
 
 ## Build and test
 
@@ -105,10 +95,10 @@ cd battery-info_app
 ```
 
 Application ID: `com.crdy.powergyan`  
-Version: `1.0.2`  
+Version: `1.0.4` (Version Code: 4)  
 Minimum Android version: API 29
 
-Release signing is local/secret-only. Use an ignored `keystore.properties` file for a signed build. Never commit keystores, passwords, local properties, or production credentials. Configure the Play Billing product in Play Console before production distribution. Do not click live production ads; use the debug build for ad testing.
+Release signing is local/secret-only. Use an ignored `keystore.properties` file for a signed build. Never commit keystores, passwords, local properties, or production credentials.
 
 ## Project structure (Source-Available)
 
@@ -118,9 +108,9 @@ Certain structural files, UI components, and build scripts are visible for trans
 
 ## Release
 
-The `v1.0.2` release contains the signed release APK and Play Console AAB:
+The `v1.0.4` release contains the signed release APK and Play Console AAB:
 
-[Download PowerGyan v1.0.2](https://github.com/ritikthakur22/battery-info_app/releases/tag/v1.0.2)
+[Download PowerGyan v1.0.4](https://github.com/ritikthakur22/battery-info_app/releases/tag/v1.0.4)
 
 ## License
 

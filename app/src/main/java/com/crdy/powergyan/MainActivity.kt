@@ -26,16 +26,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.crdy.powergyan.data.local.SettingsDataStore
-import com.crdy.powergyan.domain.model.AccentColor
-import com.crdy.powergyan.domain.model.AlertPolicy
 import com.crdy.powergyan.domain.model.ThemeMode
-import com.crdy.powergyan.monetization.BillingManager
 import com.crdy.powergyan.platform.access.CapabilityDetector
-import com.crdy.powergyan.platform.access.GenericSysfsChargeControlProvider
-import com.crdy.powergyan.platform.alerts.BatteryAlertController
 import com.crdy.powergyan.platform.battery.AndroidBatteryDataSource
 import com.crdy.powergyan.service.BatteryMonitorService
 import com.crdy.powergyan.ui.home.BatteryDetailsScreen
@@ -45,27 +39,22 @@ import com.crdy.powergyan.ui.settings.CustomizationScreen
 import com.crdy.powergyan.ui.settings.SettingsScreen
 import com.crdy.powergyan.ui.settings.SettingsViewModel
 import com.crdy.powergyan.ui.theme.PowerGyanTheme
-import com.google.android.gms.ads.MobileAds
-import com.google.android.ump.ConsentRequestParameters
-import com.google.android.ump.UserMessagingPlatform
+import com.crdy.powergyan.ui.theme.color
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
-    private var currentAlertPolicy = AlertPolicy()
     
-    private val batteryAlertController by lazy { BatteryAlertController(applicationContext) }
-    private val batteryRepository by lazy { AndroidBatteryDataSource(applicationContext, batteryAlertController) { currentAlertPolicy } }
+    // Alerts are owned by BatteryMonitorService; a second controller here would ring twice.
+    private val batteryRepository by lazy { AndroidBatteryDataSource(applicationContext) }
     private val settingsRepository by lazy { SettingsDataStore(applicationContext) }
-    private val capabilityDetector by lazy { CapabilityDetector(applicationContext) }
-    private val chargeControlProvider by lazy { GenericSysfsChargeControlProvider() }
-    private val billingManager by lazy { BillingManager(applicationContext) }
+    private val capabilityDetector by lazy { CapabilityDetector() }
     
     private val homeViewModel: HomeViewModel by viewModels { 
         HomeViewModel.Factory(batteryRepository) 
     }
     
     private val settingsViewModel: SettingsViewModel by viewModels {
-        SettingsViewModel.Factory(settingsRepository, capabilityDetector, chargeControlProvider)
+        SettingsViewModel.Factory(settingsRepository, capabilityDetector, batteryRepository)
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -73,12 +62,8 @@ class MainActivity : ComponentActivity() {
         // Force PhoneWindow to install its content decor before Compose asks for it.
         window.decorView
         super.onCreate(savedInstanceState)
-        lifecycle.addObserver(billingManager)
-        requestAdConsent()
         setContent {
             val settings by settingsViewModel.displaySettings.collectAsState()
-            currentAlertPolicy = settings.alertPolicy
-            val removeAds by billingManager.removeAds.collectAsState()
             var notificationPermissionRequested by rememberSaveable { mutableStateOf(false) }
             val notificationPermissionLauncher = rememberLauncherForActivityResult(
                 ActivityResultContracts.RequestPermission()
@@ -115,18 +100,8 @@ class MainActivity : ComponentActivity() {
                 ThemeMode.SYSTEM -> isSystemInDarkTheme()
             }
 
-            val accent = when (settings.accentColor) {
-                AccentColor.MINT -> Color(0xFF00A889)
-                AccentColor.BLUE -> Color(0xFF3689E8)
-                AccentColor.VIOLET -> Color(0xFF7655D6)
-                AccentColor.ORANGE -> Color(0xFFE88A28)
-                AccentColor.ROSE -> Color(0xFFD94C72)
-            }
-
-            PowerGyanTheme(darkTheme = darkTheme, accentColor = accent) {
-                var currentScreen by remember { mutableStateOf(0) } // 0=Home, 1=Battery Details, 2=Customization, 3=Settings
-                
-                
+            PowerGyanTheme(darkTheme = darkTheme, accentColor = settings.accentColor.color()) {
+                var currentScreen by rememberSaveable { mutableStateOf(0) } // 0=Home, 1=Analytics, 2=Control, 3=Settings
 
                 Scaffold(
                     topBar = {
@@ -175,26 +150,15 @@ class MainActivity : ComponentActivity() {
                     Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
                         AnimatedContent(targetState = currentScreen, label = "screen transition") { screen ->
                             when (screen) {
-                                0 -> HomeScreen(viewModel = homeViewModel, settings = settings, showAds = !removeAds)
-                                1 -> BatteryDetailsScreen(showAds = !removeAds, homeViewModel = homeViewModel)
+                                0 -> HomeScreen(viewModel = homeViewModel, settings = settings)
+                                1 -> BatteryDetailsScreen(homeViewModel = homeViewModel)
                                 2 -> CustomizationScreen(viewModel = settingsViewModel, settings = settings)
-                                3 -> SettingsScreen(viewModel = settingsViewModel, removeAds = removeAds, onRemoveAds = { billingManager.launchRemoveAds(this@MainActivity) }, onRestoreAds = billingManager::restorePurchases)
+                                3 -> SettingsScreen(viewModel = settingsViewModel)
                             }
                         }
                     }
                 }
             }
         }
-    }
-
-    private fun requestAdConsent() {
-        val consentInformation = UserMessagingPlatform.getConsentInformation(this)
-        val params = ConsentRequestParameters.Builder().build()
-        consentInformation.requestConsentInfoUpdate(
-            this,
-            params,
-            { UserMessagingPlatform.loadAndShowConsentFormIfRequired(this) { MobileAds.initialize(this) } },
-            { MobileAds.initialize(this) }
-        )
     }
 }
