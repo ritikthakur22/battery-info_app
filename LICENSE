@@ -1,17 +1,27 @@
-Source-Available Proprietary License — Personal Inspection Only / No Unauthorized Reuse or Commercial Use
+Source-Available Proprietary License — Personal Inspection Only
+Copyright (c) 2026 Ritik Thakur. All Rights Reserved.
 
-Copyright (c) 2026. All Rights Reserved.
+This software, including its source code, assets, documentation, and compiled binaries (including APK and AAB distributions), is proprietary and confidential property of Ritik Thakur ("the Author").
 
-1. PERMITTED USE
-You are permitted to download and inspect the available source code of this repository for personal, educational, and auditing purposes only. 
+1. GRANT OF LICENSE (PERMITTED USE)
+Subject to the terms and restrictions of this License, permission is hereby granted to any person obtaining a copy of the publicly made available files in this repository to:
+- Download and view the source files solely for personal inspection, education, security auditing, and verification purposes.
+- Install and execute precompiled binary releases (APKs) on personal devices solely for individual, non-commercial use.
 
-2. RESTRICTIONS
-You may NOT:
-- Modify, adapt, or create derivative works from this software.
-- Distribute, publish, or share the source code or any compiled binaries (APKs/AABs) derived from it.
-- Use the code, in whole or in part, within another project, application, or service.
-- Use the software for any commercial purposes or financial gain.
-- Reverse engineer, decompile, or attempt to extract omitted proprietary logic from the provided files or compiled binaries.
+2. RESTRICTIONS & PROHIBITIONS
+Except as expressly permitted above, you shall NOT, directly or indirectly:
+- Reproduce, copy, duplicate, or clone this software or any part thereof into any other repository, project, app, or service.
+- Modify, adapt, translate, alter, or create derivative works based upon the software.
+- Distribute, redistribute, sub-license, rent, lease, sell, broadcast, or publicly host the source code or binaries on third-party app stores, websites, or repositories without explicit prior written authorization from the Author.
+- Use any portion of the source code, design, branding, or algorithms for any commercial purpose or pecuniary gain.
+- Reverse engineer, decompile, disassemble, or attempt to reconstruct any omitted proprietary files, modules, or binary implementations.
+- Remove, alter, or obscure any copyright, trademark, or proprietary notices contained in the repository or application.
 
-3. NO WARRANTY
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+3. INTELLECTUAL PROPERTY & TRADEMARKS
+All title, ownership rights, and intellectual property rights in and to PowerGyan (including the name "PowerGyan", branding, launcher icons, graphics, and architectural designs) remain exclusively with Ritik Thakur. No trademark or brand license is granted herein.
+
+4. TERMINATION
+Any use of this software or its source files outside the explicit permissions of Section 1 automatically terminates your rights under this License and constitutes copyright infringement under applicable national and international copyright laws.
+
+5. DISCLAIMER OF WARRANTY
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHOR OR COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, LOSS OF DATA, DEVICE DAMAGE, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
