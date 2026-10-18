@@ -114,15 +114,26 @@ class SettingsViewModel(
     private suspend fun runChargeTest(config: com.crdy.powergyan.domain.model.SmartChargeConfig): ChargeLimitResult {
         val before = batteryRepository.getBatterySnapshot()
         if (before.plugged == PluggedState.NONE) return ChargeLimitResult(false, "Plug in your charger, then run the test.")
-        if (before.status != BatteryStatus.CHARGING) return ChargeLimitResult(false, "Run the test while the phone is charging, below your stop level.")
+        if (before.percentage >= 100) return ChargeLimitResult(false, "Battery is 100% full. Disconnect or discharge below 100% to run test.")
         val target = ChargeSwitch.detect(config) ?: return ChargeLimitResult(false, "No charging control file found. Set one manually below.")
         ChargeSwitch.testInProgress = true
         try {
-            if (!ChargeSwitch.set(target, false)) return ChargeLimitResult(false, "Root write to ${target.path} failed.")
-            delay(6000)
-            val stopped = batteryRepository.getBatterySnapshot().status != BatteryStatus.CHARGING
-            return if (stopped) ChargeLimitResult(true, "Works. Charging paused through ${target.path}.")
-            else ChargeLimitResult(false, "Charging didn't stop with ${target.path}. Try another control file.")
+            if (!ChargeSwitch.set(target, false)) {
+                return ChargeLimitResult(false, "Root write to ${target.path} failed. Ensure root access is granted in Magisk/KernelSU.")
+            }
+            delay(2500)
+            val isTargetDisabled = ChargeSwitch.isCharging(target) == false
+            val kernelStatus = ChargeSwitch.readKernelStatus()
+            val kernelStopped = kernelStatus?.contains("Discharg", ignoreCase = true) == true ||
+                    kernelStatus?.contains("Not charging", ignoreCase = true) == true
+            val androidStopped = batteryRepository.getBatterySnapshot().status != BatteryStatus.CHARGING
+
+            val stopped = isTargetDisabled || kernelStopped || androidStopped
+            return if (stopped) {
+                ChargeLimitResult(true, "Works! Charging paused successfully via ${target.path}.")
+            } else {
+                ChargeLimitResult(false, "Charging didn't stop with ${target.path}. Try another control file.")
+            }
         } finally {
             ChargeSwitch.set(target, true)
             ChargeSwitch.testInProgress = false

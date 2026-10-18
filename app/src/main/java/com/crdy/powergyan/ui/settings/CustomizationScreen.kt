@@ -134,11 +134,26 @@ fun CustomizationScreen(viewModel: SettingsViewModel, settings: DisplaySettings)
 
                 val chargeResult by viewModel.chargeLimitResult.collectAsState()
                 chargeResult?.let {
-                    Text(
-                        it.message,
-                        color = if (it.success) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall
-                    )
+                    val containerColor = if (it.success) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.errorContainer
+                    val contentColor = if (it.success) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onErrorContainer
+                    Surface(
+                        color = containerColor,
+                        shape = MaterialTheme.shapes.medium,
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                it.message,
+                                color = contentColor,
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
                 }
 
                 var showAdvanced by remember { mutableStateOf(false) }
