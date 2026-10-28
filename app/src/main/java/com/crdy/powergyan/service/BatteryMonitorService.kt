@@ -47,7 +47,9 @@ class BatteryMonitorService : Service() {
     // Smart Charge state for the current plug-in session.
     private var target: ChargeTarget? = null
     private var lastDecision: ChargeDecision? = null
+    private var lastPluggedState: PluggedState = PluggedState.NONE
     private var justPlugged = true
+    private var lastSwitchTimestamp = 0L
 
     private val screenReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -84,7 +86,16 @@ class BatteryMonitorService : Service() {
             combine(AndroidBatteryDataSource(applicationContext).observeBatteryState(), settingsStore.displaySettings) { snapshot, settings ->
                 Triple(snapshot, settings.alertPolicy, settings.smartChargeConfig)
             }.collect { (snapshot, policy, config) ->
-                val pluggedIn = snapshot.plugged != PluggedState.NONE
+                if (snapshot.plugged != PluggedState.NONE) {
+                    lastPluggedState = snapshot.plugged
+                }
+                val now = Calendar.getInstance()
+                val minuteOfDay = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)
+                val limits = config.limitsFor(if (snapshot.plugged != PluggedState.NONE) snapshot.plugged else lastPluggedState, minuteOfDay)
+                val isHolding = lastDecision?.charge == false && snapshot.percentage > limits.second
+                val isDebouncing = System.currentTimeMillis() - lastSwitchTimestamp < 3500L
+                val pluggedIn = snapshot.plugged != PluggedState.NONE || isHolding || isDebouncing
+
                 alertController.onSnapshot(snapshot, policy)
                 if (historyHelper.insertSnapshot(snapshot)) runCatching { BatteryGlanceWidget().updateAll(applicationContext) }
                 usageTracker.tick(System.currentTimeMillis(), snapshot.percentage, powerManager.isInteractive, pluggedIn)
@@ -92,12 +103,15 @@ class BatteryMonitorService : Service() {
                 val smartStatus = if (config.enabled && pluggedIn && !ChargeSwitch.testInProgress) {
                     withContext(Dispatchers.IO) { enforceSmartCharge(snapshot, config) }
                 } else null
-                updateNotification(notificationText(snapshot, config, smartStatus))
+                updateNotification(notificationText(snapshot, config, smartStatus, isHolding))
 
                 // We stay alive while unplugged to catch the next plug-in, but leave charging on whenever we're
                 // not actively managing it, so a stopped service or turned-off feature never blocks charging.
-                if (!pluggedIn || !config.enabled) {
-                    if (!justPlugged) withContext(Dispatchers.IO) { restoreCharging() }
+                if (!config.enabled) {
+                    if (!justPlugged) withContext(Dispatchers.IO) { restoreCharging(config) }
+                    justPlugged = true
+                } else if (!pluggedIn && !isHolding) {
+                    if (!justPlugged) withContext(Dispatchers.IO) { restoreCharging(config) }
                     justPlugged = true
                 }
 
@@ -110,7 +124,12 @@ class BatteryMonitorService : Service() {
         val t = ChargeSwitch.detect(config) ?: return "Can't find this phone's charging control. Set it in Control."
         target = t
         val now = Calendar.getInstance()
-        val (stop, resume) = config.limitsFor(snapshot.plugged, now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE))
+        val plugged = if (snapshot.plugged != PluggedState.NONE) snapshot.plugged else lastPluggedState
+        val (stop, resume) = config.limitsFor(plugged, now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE))
+        if (lastDecision == null && snapshot.percentage > resume && ChargeSwitch.isCharging(t) == false) {
+            lastDecision = ChargeDecision(charge = false)
+            justPlugged = false
+        }
         val decision = decideCharging(
             level = snapshot.percentage,
             tempC = snapshot.temperatureC,
@@ -121,6 +140,9 @@ class BatteryMonitorService : Service() {
             justPlugged = justPlugged
         )
         justPlugged = false
+        if (decision.charge != lastDecision?.charge) {
+            lastSwitchTimestamp = System.currentTimeMillis()
+        }
         if (!ChargeSwitch.set(t, decision.charge)) return "Couldn't change charging. Check that root access is still granted."
         lastDecision = decision
         return when {
@@ -131,8 +153,9 @@ class BatteryMonitorService : Service() {
         }
     }
 
-    private fun restoreCharging() {
-        target?.let { ChargeSwitch.set(it, true) }
+    private fun restoreCharging(config: SmartChargeConfig? = null) {
+        val t = target ?: config?.let { ChargeSwitch.detect(it) }
+        t?.let { ChargeSwitch.set(it, true) }
         lastDecision = null
     }
 
@@ -184,7 +207,8 @@ class BatteryMonitorService : Service() {
         getSystemService(NotificationManager::class.java).notify(1, createNotification(text))
     }
 
-    private fun notificationText(snapshot: BatterySnapshot, config: SmartChargeConfig, smartStatus: String?): String = when {
+    private fun notificationText(snapshot: BatterySnapshot, config: SmartChargeConfig, smartStatus: String?, isHolding: Boolean): String = when {
+        isHolding -> smartStatus ?: "Holding charge at limit"
         snapshot.plugged == PluggedState.NONE -> "On battery, ${snapshot.percentage}%"
         config.enabled -> smartStatus ?: "Smart Charge is on"
         else -> "Charging, ${snapshot.percentage}%"
